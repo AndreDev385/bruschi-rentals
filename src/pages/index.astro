@@ -1,11 +1,170 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
+import { Icon } from "astro-icon/components";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+import Layout from "../layouts/Layout.astro";
+import Carousel from "../components/Carousel.astro";
+import BenefitCard from "../components/BenefitCard.astro";
+import TestimonialCard from "../components/TestimonialCard.astro";
+import Footer from "../components/Footer.astro";
 ---
 
 <Layout>
-	<Welcome />
+	<!-- Hero Section -->
+	<section class="relative w-full min-h-screen flex items-center">
+		<div class="absolute inset-0 z-0">
+			<div class="absolute inset-0 bg-gradient-to-r from-black/70 to-black/40 z-10"></div>
+			<img 
+				 src="/buildings/1.jpg" 
+					  alt="Miami Skyline" 
+					  class="w-full h-full object-cover"
+					  />
+		</div>
+
+		<div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-20 flex justify-center">
+			<div class="max-w-3xl">
+				<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 text-center">
+					We help you find your dream home in Miami
+				</h1>
+				<p class="text-xl text-white/90 mb-8 max-w-2xl text-center">
+				Totally free and fully personalized just for you. With both in-person and virtual tours, we guide you through the whole process step by step until you get the keys of your new home.
+				</p>
+				<div class="flex justify-center">
+					<a 
+					 href="#contact" 
+					 class="inline-block px-8 py-4 bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105"
+					 >
+					 Contact Us
+					</a>
+				</div>
+			</div>
+		</div>
+		<div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20">
+			<a href="#benefits" class="flex flex-col items-center text-white/80 hover:text-white transition-colors">
+				<span class="text-sm mb-2">Discover More</span>
+				<Icon name="mdi:chevron-down" class="w-6 h-6 animate-bounce" />
+			</a>
+		</div>
+	</section>
+
+  <!-- Benefits Section -->
+  <section id="benefits" class="py-20 bg-white">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Why Choose Us</h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          We make finding your dream rental in Miami simple, stress-free, and enjoyable.
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <BenefitCard 
+          icon="mdi:magnify"
+          title="Personalized Search"
+          description="We tailor our property search to your specific needs, preferences, and budget."
+        />
+        
+        <BenefitCard 
+          icon="mdi:home-outline"
+          title="Virtual Tours"
+          description="Save time with high-quality virtual tours of properties before visiting in person."
+        />
+        
+        <BenefitCard 
+          icon="mdi:cash"
+          title="No Hidden Fees"
+          description="Our service is completely free for renters. We're transparent about all costs."
+        />
+        
+        <BenefitCard 
+          icon="mdi:map-marker"
+          title="Local Expertise"
+          description="Our agents have deep knowledge of Miami neighborhoods and market trends."
+        />
+        
+        <BenefitCard 
+          icon="mdi:handshake"
+          title="Negotiation Support"
+          description="We help negotiate the best terms and rental rates on your behalf."
+        />
+        
+        <BenefitCard 
+          icon="mdi:check-circle"
+          title="End-to-End Support"
+          description="From search to signing, we guide you through every step of the rental process."
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- Properties Carousel Section -->
+  <section class="py-20 bg-gray-50">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Featured Properties</h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          Explore our selection of premium Miami properties available for rent.
+        </p>
+      </div>
+      
+      <Carousel 
+		   items={[
+		   { image: "../../public/buildings/1.jpg", title: "Brickell Heights" },
+		   { image: "../../public/buildings/2.jpg", title: "South Beach Condo" },
+		   { image: "../../public/buildings/3.jpg", title: "Edgewater Luxury Apartment" },
+		   { image: "../../public/buildings/4.jpg", title: "Coconut Grove Villa" },
+		   { image: "../../public/buildings/4.jpg", title: "Downtown Loft" }
+		   ]}
+      />
+    </div>
+  </section>
+
+ <!-- Testimonials Section -->
+  <section class="py-20 bg-white">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">What Our Clients Say</h2>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+          Don't just take our word for it. Hear from people who found their dream homes with us.
+        </p>
+      </div>
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <TestimonialCard 
+          quote="Working with this team made finding my apartment in Brickell so easy. They understood exactly what I was looking for and found me the perfect place within my budget."
+          author="Sarah Johnson"
+          position="Brickell Resident"
+          avatar="/images/avatar-1.jpg"
+          rating={5}
+        />
+        
+        <TestimonialCard 
+          quote="As someone new to Miami, I was overwhelmed by the rental market. My agent was patient, knowledgeable, and found me a beautiful condo in South Beach that exceeded my expectations."
+          author="Michael Rodriguez"
+          position="South Beach Resident"
+          avatar="/images/avatar-2.jpg"
+          rating={5}
+        />
+        
+        <TestimonialCard 
+          quote="The virtual tour option saved me so much time. I was relocating from New York and was able to secure my apartment before even arriving in Miami. Seamless experience!"
+          author="Emma Chen"
+          position="Downtown Resident"
+          avatar="/images/avatar-3.jpg"
+          rating={4}
+        />
+      </div>
+      
+      <div class="mt-12 text-center">
+        <a 
+          href="#contact" 
+          class="inline-block px-8 py-4 bg-rose-500 hover:bg-rose-600 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105"
+        >
+          Find Your Dream Home Today
+        </a>
+      </div>
+    </div>
+  </section>
+
+
+	<Footer />
 </Layout>
