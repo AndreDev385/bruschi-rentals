@@ -4,10 +4,18 @@ import { Icon } from "astro-icon/components";
 const { icon, title, description } = Astro.props;
 ---
 
-<div class="bg-white p-8 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-  <div class="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mb-6">
-    <Icon name={icon} class="w-6 h-6 text-rose-500" />
+<div
+  class="bg-white p-8 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-1"
+>
+  <div
+    class="size-16 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-6"
+  >
+    <Icon name={icon} class="size-8 text-rose-500" />
   </div>
-  <h3 class="text-xl font-semibold mb-3 text-gray-900">{title}</h3>
-  <p class="text-gray-600">{description}</p>
+  <h3 class="text-xl font-bold text-obsidian mb-4 text-center">
+    {title}
+  </h3>
+  <p class="text-mocha leading-relaxed text-center">
+    {description}
+  </p>
 </div>

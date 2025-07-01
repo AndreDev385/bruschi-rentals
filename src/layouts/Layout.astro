@@ -1,25 +1,43 @@
 ---
+import { ViewTransitions } from "astro:transitions";
+
 import "../styles/global.css";
+import "animate.css";
+import Footer from "../components/Footer.astro";
 ---
+
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Bruschi Rentals</title>
-	</head>
-	<body>
-		<slot />
-	</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="logos/isotype.svg"
+      media="(prefers-color-scheme: light)"
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="logos/isotype_dark.svg"
+      media="(prefers-color-scheme: dark)"
+    />
+    <meta name="generator" content={Astro.generator} />
+    <title>Bruschi Rentals</title>
+    <ViewTransitions />
+  </head>
+  <body>
+    <slot />
+    <Footer />
+  </body>
 </html>
 
 <style>
-	html,
-	body {
-		margin: 0;
-		width: 100%;
-		height: 100%;
-	}
+  html,
+  body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+  }
 </style>

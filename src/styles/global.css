@@ -1,6 +1,91 @@
 @import "tailwindcss";
 
 :root {
-    --primary-color: #74685E;
-    --secondary-color: #322C2B;
+	--primary-color: #74685e;
+	--secondary-color: #322c2b;
+	--animate-delay: 0.5s;
+}
+
+* {
+	font-family: "Bell" sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+	font-family: "Quinn", sans-serif;
+}
+
+@theme {
+	--color-obsidian: #261d18;
+	--color-soft: #f1ece8;
+	--color-mauve: #897c7f;
+	--color-mocha: #5d4738;
+}
+
+@font-face {
+	font-family: "Quinn";
+	src: url("fonts/bell.tff");
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Bell";
+	src: url("fonts/bell-bold.tff");
+	font-weight: bold;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Bell";
+	src: url("fonts/bell-italic.tff");
+	font-weight: normal;
+	font-style: italic;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Oxygen";
+	src: url("fonts/oxygen.tff");
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Quinn";
+	src: url("fonts/quinn.otf");
+	font-weight: normal;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Quinn";
+	src: url("fonts/quinn-bold.otf");
+	font-weight: bold;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Quinn";
+	src: url("fonts/quinn-semibold.otf");
+	font-weight: 600;
+	font-style: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Quinn";
+	src: url("fonts/quinn-italic.otf");
+	font-weight: normal;
+	font-style: italic;
+	font-display: swap;
 }
