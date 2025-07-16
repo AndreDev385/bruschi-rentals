@@ -1,5 +1,8 @@
 ---
 import { Icon } from "astro-icon/components";
+import { Image } from "astro:assets";
+
+import Logo from "../assets/logo_dark.svg";
 
 const areas: string[] = [
 	"Wynwood",
@@ -23,11 +26,7 @@ const areas: string[] = [
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
       <div class="px-2 space-y-4">
-        <img
-          class="w-full max-w-[200px] h-auto"
-          src="logos/logo_dark.svg"
-          alt="logo"
-        />
+        <Logo class="w-full max-w-[200px] h-auto" />
         <p class="text-soft mb-6">
           Your trusted partner in finding the perfect rental property in Miami.
           We make the process simple, transparent, and enjoyable.
