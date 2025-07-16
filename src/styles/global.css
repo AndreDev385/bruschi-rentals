@@ -1,11 +1,5 @@
 @import "tailwindcss";
 
-:root {
-	--primary-color: #74685e;
-	--secondary-color: #322c2b;
-	--animate-delay: 0.5s;
-}
-
 * {
 	font-family: "Bell" sans-serif;
 }
@@ -24,6 +18,7 @@ h6 {
 	--color-soft: #f1ece8;
 	--color-mauve: #897c7f;
 	--color-mocha: #5d4738;
+	--color-primary: oklch(59.2% 0.249 0.584);
 }
 
 @font-face {

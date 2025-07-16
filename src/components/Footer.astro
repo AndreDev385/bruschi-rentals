@@ -2,11 +2,20 @@
 import { Icon } from "astro-icon/components";
 
 const areas: string[] = [
-	"Windwood",
+	"Wynwood",
+	"Dania Beach",
 	"Midtown",
+	"Fort Lauderdale",
 	"Edgewater",
-	"Brickell",
+	"Hialeah",
 	"Downtown",
+	"Hialeah Gardens",
+	"Brickell",
+	"Doral",
+	"North Miami",
+	"Coral Gables",
+	"Aventura",
+	"Kendall",
 ];
 ---
 
@@ -27,7 +36,7 @@ const areas: string[] = [
 
       <div class="px-2">
         <h3 class="text-lg font-bold mb-6">Areas We Serve</h3>
-        <ul class="grid grid-cols-1">
+        <ul class="grid grid-cols-2">
           {areas.map((a) => <li>{a}</li>)}
         </ul>
       </div>
@@ -39,7 +48,7 @@ const areas: string[] = [
             <a
               target="_blank"
               href="https://www.instagram.com/bruschirentals?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
-              class="text-soft hover:scale-120 hover:text-rose-500 transition-colors"
+              class="text-soft hover:scale-120 hover:text-primary transition-colors"
             >
               <Icon name="mdi:instagram" class="size-10" />
               <span class="sr-only">Instagram</span>
@@ -49,7 +58,7 @@ const areas: string[] = [
             <a
               target="_blank"
               href="www.linkedin.com/bruschi-rentals"
-              class="text-soft hover:scale-120 hover:text-rose-500 transition-colors"
+              class="text-soft hover:scale-120 hover:text-primary transition-colors"
             >
               <Icon name="mdi:linkedin" class="size-10" />
               <span class="sr-only">LinkedIn</span>
