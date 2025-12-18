@@ -1,0 +1,18 @@
+---
+export const prerender = false;
+import { listNeighborhoods } from "@/services/neighborhoods.server";
+import Layout from "@/layouts/Layout.astro";
+import { FormWizard } from "@/components/FormWizard";
+
+const neighborhoods = await listNeighborhoods();
+---
+
+<Layout>
+  <section class="min-h-screen bg-soft-dark py-20">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-2xl mx-auto">
+        <FormWizard client:load neighborhoods={neighborhoods} />
+      </div>
+    </div>
+  </section>
+</Layout>

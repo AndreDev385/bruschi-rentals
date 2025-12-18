@@ -1,9 +1,7 @@
 ---
-import { Icon } from "astro-icon/components";
 import { Image, Picture } from "astro:assets";
 
 import Layout from "../layouts/Layout.astro";
-import Carousel from "../components/Carousel.astro";
 import BenefitCard from "../components/BenefitCard.astro";
 import TestimonialCard from "../components/TestimonialCard.astro";
 
@@ -12,59 +10,59 @@ import Hero from "../assets/hero.jpg";
 import Paulina from "../assets/paulina.jpg";
 
 const testimonials = [
-	{
-		quote:
-			"Where do I begin ? By chance I found Paulina from a posting on Facebook and she exceeded my expectations. She worked day in and day out (literally because I was looking for something super specific!) until she found the perfect unit for me. She was super supportive, very personable, and just a lovely professional individual. I am so happy I was able to work with her and I highly recommend her. She will literally consider everything on your wishlist and find a perfect spot.",
-		author: "Samantha Ingunza",
-		avatar:
-			"https://lh3.googleusercontent.com/a/ACg8ocKq-4LR-FAdwTxE0qi2WNkjRbAQ_GglV1XLVe_eDnMz32STIA=w36-h36-p-rp-mo-ba2-br100",
-		href: "https://maps.app.goo.gl/tG6rN8BDdVAastUr8",
-	},
-	{
-		quote:
-			"Tuve el placer de trabajar con Paulina y su servicio fue excepcional. Vivía en otro estado, y gracias a su profesionalismo, todo el proceso de búsqueda de apartamentos y mudanza fue mucho más sencillo. Escuchó atentamente mis necesidades y me ofreció opciones perfectas, gestionando todo de manera eficiente. Su comunicación fue constante y clara, lo que me dio mucha confianza. Gracias a ella, mi mudanza fue mucho más ligera y sin complicaciones. La recomiendo sin dudarlo a cualquiera que necesite un excelente servicio inmobiliario.",
-		author: "Nicole",
-		avatar:
-			"https://lh3.googleusercontent.com/a/ACg8ocJImPkZLdugQ6koarA3YMXkEgTvPOqNB-Fq63mwr2oKS8k70Q=w36-h36-p-rp-mo-br100",
-		href: "https://maps.app.goo.gl/ekiiUtSg5WkJXFBP7",
-	},
-	{
-		quote:
-			"Wow! Literally im speechless by the work Paulina did for me. I did everything from afar and she made me feel like I was present showed me apartments through facetime until i found the one. I would recommend her with my eyes closed. One of the best client services I have experienced!! Thank you so much for making my moving so smooth!!",
-		author: "Gloria Barraza",
-		avatar:
-			"https://lh3.googleusercontent.com/a-/ALV-UjVcinOPXd2_j_OgzRiCtYuJzEVn6MgH0bsm9zKi-0JHrc4qgMfo=w36-h36-p-rp-mo-br100",
-		href: "https://maps.app.goo.gl/1NkZaf8YRJU7BzJh6",
-	},
-	{
-		quote:
-			"Paulina was amazing to work with — professional, knowledgeable, and always responsive. Her bilingual skills made communication seamless, and she truly went above and beyond to help us find the perfect apartment. Highly recommend!",
-		author: "Miguel Rosa",
-		avatar:
-			"https://lh3.googleusercontent.com/a/ACg8ocKOwC4G_bWyF2hPXqYNeN3r0dWeZZM19F4lvNNqkcizh5Mxn8Gz=w36-h36-p-rp-mo-br100",
-		href: "https://share.google/JV7Z4N4bTdiC0JpOO",
-	},
-	{
-		quote:
-			"Working with Paulina was a five star experience. She was able to streamline the entire process and take the stress out of securing an apartment. Planning a move from California to Miami required a lot of coordination and open communication, Paulina was there at every point providing advice and her sharing her expertise. If you are looking for an experienced professional who goes above and beyond and puts her clients first, I highly recommend working with Paulina!",
-		author: "Margarita Monge",
-		avatar:
-			"https://lh3.googleusercontent.com/a/ACg8ocJeoyFMdkE7ZCt9lSf2oKA6VI2l37LjascUr5YlYKcqQ2NE=w36-h36-p-rp-mo-br100",
-		href: "https://maps.app.goo.gl/vjsFUyN3DzdUXatM8",
-	},
-	{
-		quote:
-			"I would give Paulina 20 stars if I could! She has been nothing short of spectacular. My husband and our family just relocated from another state and Paulina held our hands the entire way. Early on in the process before the move was confirmed she took our information and what we were looking for, keeping an eye out for what would fit. Answering 101 questions without even knowing if we would be moving forsure. She made sure that we were aware of everything we needed when the time came to secure an apartment, ready and prepared. She had multiple options ready for us when we confirmed we would be relocating. Offered pictures, videos tours, special pricing for that month, and had every detail we wanted to consider accounted for. She assisted day of move in, checked in multiple times afterwards and was genuinely just such a joy to work with. You can tell she loves what she does and  it felt like she was also moving with us with how excited and supportive she was. We love our new spot it fits everything we wanted and not a drop of sweat or stress happened because of Paulina. If for some reason we ever have to relocate we will absolutely be reaching out again. If you’re looking for someone to be detail oriented, responsive, knowledgeable, and truly just be in your corner- Call Paulina!",
-		author: "Allison Soto",
-		avatar:
-			"https://lh3.googleusercontent.com/a-/ALV-UjXztWag4-5mLNNY4L_ei4Atzl_xGv4AdfwZM2YAaAP-SYnpOTfn=w36-h36-p-rp-mo-br100",
-		href: "https://maps.app.goo.gl/86kTs5jqQzQ8xr4F7",
-	},
+  {
+    quote:
+      "Where do I begin ? By chance I found Paulina from a posting on Facebook and she exceeded my expectations. She worked day in and day out (literally because I was looking for something super specific!) until she found the perfect unit for me. She was super supportive, very personable, and just a lovely professional individual. I am so happy I was able to work with her and I highly recommend her. She will literally consider everything on your wishlist and find a perfect spot.",
+    author: "Samantha Ingunza",
+    avatar:
+      "https://lh3.googleusercontent.com/a/ACg8ocKq-4LR-FAdwTxE0qi2WNkjRbAQ_GglV1XLVe_eDnMz32STIA=w36-h36-p-rp-mo-ba2-br100",
+    href: "https://maps.app.goo.gl/tG6rN8BDdVAastUr8",
+  },
+  {
+    quote:
+      "Tuve el placer de trabajar con Paulina y su servicio fue excepcional. Vivía en otro estado, y gracias a su profesionalismo, todo el proceso de búsqueda de apartamentos y mudanza fue mucho más sencillo. Escuchó atentamente mis necesidades y me ofreció opciones perfectas, gestionando todo de manera eficiente. Su comunicación fue constante y clara, lo que me dio mucha confianza. Gracias a ella, mi mudanza fue mucho más ligera y sin complicaciones. La recomiendo sin dudarlo a cualquiera que necesite un excelente servicio inmobiliario.",
+    author: "Nicole",
+    avatar:
+      "https://lh3.googleusercontent.com/a/ACg8ocJImPkZLdugQ6koarA3YMXkEgTvPOqNB-Fq63mwr2oKS8k70Q=w36-h36-p-rp-mo-br100",
+    href: "https://maps.app.goo.gl/ekiiUtSg5WkJXFBP7",
+  },
+  {
+    quote:
+      "Wow! Literally im speechless by the work Paulina did for me. I did everything from afar and she made me feel like I was present showed me apartments through facetime until i found the one. I would recommend her with my eyes closed. One of the best client services I have experienced!! Thank you so much for making my moving so smooth!!",
+    author: "Gloria Barraza",
+    avatar:
+      "https://lh3.googleusercontent.com/a-/ALV-UjVcinOPXd2_j_OgzRiCtYuJzEVn6MgH0bsm9zKi-0JHrc4qgMfo=w36-h36-p-rp-mo-br100",
+    href: "https://maps.app.goo.gl/1NkZaf8YRJU7BzJh6",
+  },
+  {
+    quote:
+      "Paulina was amazing to work with — professional, knowledgeable, and always responsive. Her bilingual skills made communication seamless, and she truly went above and beyond to help us find the perfect apartment. Highly recommend!",
+    author: "Miguel Rosa",
+    avatar:
+      "https://lh3.googleusercontent.com/a/ACg8ocKOwC4G_bWyF2hPXqYNeN3r0dWeZZM19F4lvNNqkcizh5Mxn8Gz=w36-h36-p-rp-mo-br100",
+    href: "https://share.google/JV7Z4N4bTdiC0JpOO",
+  },
+  {
+    quote:
+      "Working with Paulina was a five star experience. She was able to streamline the entire process and take the stress out of securing an apartment. Planning a move from California to Miami required a lot of coordination and open communication, Paulina was there at every point providing advice and her sharing her expertise. If you are looking for an experienced professional who goes above and beyond and puts her clients first, I highly recommend working with Paulina!",
+    author: "Margarita Monge",
+    avatar:
+      "https://lh3.googleusercontent.com/a/ACg8ocJeoyFMdkE7ZCt9lSf2oKA6VI2l37LjascUr5YlYKcqQ2NE=w36-h36-p-rp-mo-br100",
+    href: "https://maps.app.goo.gl/vjsFUyN3DzdUXatM8",
+  },
+  {
+    quote:
+      "I would give Paulina 20 stars if I could! She has been nothing short of spectacular. My husband and our family just relocated from another state and Paulina held our hands the entire way. Early on in the process before the move was confirmed she took our information and what we were looking for, keeping an eye out for what would fit. Answering 101 questions without even knowing if we would be moving forsure. She made sure that we were aware of everything we needed when the time came to secure an apartment, ready and prepared. She had multiple options ready for us when we confirmed we would be relocating. Offered pictures, videos tours, special pricing for that month, and had every detail we wanted to consider accounted for. She assisted day of move in, checked in multiple times afterwards and was genuinely just such a joy to work with. You can tell she loves what she does and  it felt like she was also moving with us with how excited and supportive she was. We love our new spot it fits everything we wanted and not a drop of sweat or stress happened because of Paulina. If for some reason we ever have to relocate we will absolutely be reaching out again. If you’re looking for someone to be detail oriented, responsive, knowledgeable, and truly just be in your corner- Call Paulina!",
+    author: "Allison Soto",
+    avatar:
+      "https://lh3.googleusercontent.com/a-/ALV-UjXztWag4-5mLNNY4L_ei4Atzl_xGv4AdfwZM2YAaAP-SYnpOTfn=w36-h36-p-rp-mo-br100",
+    href: "https://maps.app.goo.gl/86kTs5jqQzQ8xr4F7",
+  },
 ];
 ---
 
 <Layout>
-  <!-- Hero Section -->
+  <!-- Neighborhood Selector Hero -->
   <Logo
     class="w-full max-w-40 lg:max-w-[240px] h-auto absolute top-5 left-5 z-100"
   />
@@ -92,34 +90,20 @@ const testimonials = [
           We help you find your <strong class="text-primary">dream home</strong>
           in Miami
         </h1>
-        <p class="text-xl text-soft mb-8 text-center">
-          Totally free and fully personalized. We guide you through the whole
-          process until you get the keys of your new home
-        </p>
-        <div class="flex justify-center">
+        <div class="text-center">
           <a
-            href="https://wa.me/message/F5OFMA5RIRXYJ1"
-            target="_blank"
-            class="inline-block px-8 py-4 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg transition-all duration-300 transform hover:scale-105"
+            href="/more-info"
+            class="inline-block px-8 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105"
           >
-            Contact Us
+            Start Your Search
           </a>
         </div>
       </div>
     </div>
-    <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20">
-      <a
-        href="#benefits"
-        class="flex flex-col items-center text-white/80 hover:text-white transition-colors"
-      >
-        <span class="text-sm font-semibold">Discover More</span>
-        <Icon name="mdi:chevron-down" class="size-6" />
-      </a>
-    </div>
   </section>
 
   <!-- Value proposition -->
-  <section id="benefits" class="bg-soft py-20 flex items-center">
+  <section id="benefits" class="bg-soft-dark py-20 flex items-center">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-16 space-y-8">
         <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-obsidian">
@@ -130,7 +114,9 @@ const testimonials = [
           time-consuming. You deserve better than endless scrolling through
           listings that don't match your needs.
         </p>
-        <div class="bg-white p-8 rounded-2xl shadow-lg max-w-4xl mx-auto mb-16">
+        <div
+          class="bg-soft-light p-8 rounded-2xl shadow-m max-w-4xl mx-auto mb-16"
+        >
           <h3 class="text-2xl font-bold text-primary mb-4">
             Here's How We Solve This Problem
           </h3>
@@ -186,7 +172,7 @@ const testimonials = [
     </div>
   </section>
 
-  <section class="bg-white py-20">
+  <section class="bg-soft-light py-20">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <article class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="space-y-8">
@@ -271,7 +257,7 @@ const testimonials = [
   </section>-->
 
   {/* Testimonials */}
-  <section class="py-20 bg-soft">
+  <section class="py-20 bg-soft-dark">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-16">
         <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">

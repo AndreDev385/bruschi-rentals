@@ -1,5 +1,5 @@
 ---
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from "astro:transitions";
 
 import "../styles/global.css";
 import "animate.css";
@@ -25,7 +25,7 @@ import Footer from "../components/Footer.astro";
     />
     <meta name="generator" content={Astro.generator} />
     <title>Bruschi Rentals</title>
-    <ViewTransitions />
+    <ClientRouter />
   </head>
   <body>
     <slot />
