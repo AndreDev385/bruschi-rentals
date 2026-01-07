@@ -1,0 +1,243 @@
+---
+export const prerender = false;
+
+import { ChevronLeft, MapPin } from "lucide-react";
+import invariant from "tiny-invariant";
+
+import Layout from "@/layouts/Layout.astro";
+import { getSession, setSession } from "@/lib/auth";
+import type { ClientOptionDetailed } from "@/types";
+import { fetchClientOption } from "@/services/options.server";
+import { handleAuthError } from "@/lib/auth-utils";
+import { Badge } from "@/components/ui/badge";
+import MediaGallery from "@/components/MediaGallery";
+import FavoriteButton from "@/components/portal/FavoriteButton";
+import PromotionsSection from "@/components/portal/PromotionsSection";
+import FeedbackForm from "@/components/portal/FeedbackForm";
+import { Button } from "@/components/ui/button";
+
+const session = await getSession(Astro);
+
+if (!session) {
+  return Astro.redirect("/login");
+}
+
+const cookies = Astro.request.headers.get("cookie") || "";
+const hasSeenWelcome = cookies.includes("welcome_seen=true");
+
+const url = new URL(Astro.request.url);
+const search = url.search;
+
+if (!hasSeenWelcome) {
+  return Astro.redirect("/welcome");
+}
+
+const accessToken = session.accessToken;
+
+const { id } = Astro.params;
+invariant(id);
+
+let option: ClientOptionDetailed;
+
+try {
+  option = await fetchClientOption(id, accessToken);
+  option.building_images = [
+    ...option.building_images,
+    "https://res.cloudinary.com/dnlhvunnf/image/upload/v1766094234/fk0s5oeiootf0vjd7ypb.jpg",
+    "https://res.cloudinary.com/dnlhvunnf/image/upload/v1766094227/qaspwbdtmhhnwzxgulvl.jpg",
+    "https://res.cloudinary.com/dnlhvunnf/image/upload/v1766094223/awyn1ty5g9g0hwniqerl.jpg",
+  ];
+  option.building_videos = [
+    ...option.building_videos,
+    "https://res.cloudinary.com/dnlhvunnf/video/upload/v1766095963/pow4d2rqdr3fbakwwxui.mp4",
+  ];
+} catch (error) {
+  const authResult = await handleAuthError(
+    error as Error,
+    Astro,
+    session.refreshToken,
+  );
+
+  if (authResult.shouldRetry && authResult.newTokens) {
+    // Update session with new tokens
+    const updatedSession = {
+      ...session,
+      accessToken: authResult.newTokens.accessToken,
+      refreshToken: authResult.newTokens.refreshToken,
+      expiresIn: authResult.newTokens.expiresIn,
+    };
+    setSession(Astro, updatedSession);
+
+    // Retry the fetch with new token
+    try {
+      option = await fetchClientOption(id, updatedSession.accessToken);
+    } catch (retryError) {
+      // If retry fails, redirect
+      console.error("Retry failed:", retryError);
+      return Astro.redirect("/login");
+    }
+  } else if (authResult.shouldRedirect) {
+    return Astro.redirect("/login");
+  } else {
+    // Not an auth error, redirect to portal (option not found)
+    return Astro.redirect("/portal");
+  }
+}
+
+console.log({ option });
+
+const formatApartmentType = (type: string) => {
+  switch (type) {
+    case "Studio":
+      return "Studio";
+    case "OneBed":
+      return "1 Bedroom";
+    case "TwoBeds":
+      return "2 Bedrooms";
+    case "ThreeOrMoreBeds":
+      return "3+ Bedrooms";
+    default:
+      return type;
+  }
+};
+---
+
+<Layout>
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-card border-b border-border">
+    <div class="max-w-4xl mx-auto py-4">
+      <div class="flex items-center justify-between pr-2">
+        <Button type="button" variant="ghost">
+          <a href={`/portal${search}`} class="flex items-center gap-1">
+            <ChevronLeft className="h-4 w-4" />
+            Back to Options
+          </a>
+        </Button>
+
+        <FavoriteButton
+          optionId={option.id}
+          initialFavorited={option.favorited}
+          client:load
+        />
+      </div>
+    </div>
+  </header>
+
+  <section class="min-h-screen bg-background">
+    <div class="container mx-auto">
+      <!-- Media Gallery -->
+      <div class="max-w-4xl mx-auto">
+        <MediaGallery
+          apartmentVideos={option.apartment_videos}
+          buildingVideos={option.building_videos}
+          apartmentImages={option.apartment_images}
+          buildingImages={option.building_images}
+          client:load
+        />
+      </div>
+
+      <!-- Property Details -->
+      <div class="max-w-4xl mx-auto space-y-8 pb-12 p-4">
+        <!-- Header -->
+        <div class="space-y-4">
+          <div class="flex flex-wrap gap-2">
+            <Badge className="font-bold"
+              >{formatApartmentType(option.apartment_type)}</Badge
+            >
+            {
+              option.is_high_rise && (
+                <Badge className="font-bold">High Rise Building</Badge>
+              )
+            }
+            {
+              option.has_view && (
+                <Badge className="font-bold">Amazing View</Badge>
+              )
+            }
+          </div>
+
+          <div>
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">
+              {option.building_name}
+            </h1>
+            <div class="flex items-center gap-2 text-muted-foreground">
+              <MapPin className="h-5 w-5" />
+              <span class="text-lg">{option.neighborhood_name}</span>
+            </div>
+          </div>
+
+          <!-- Price -->
+          <div>
+            <div class="text-3xl font-bold text-primary" id="price-display">
+              ${option.price_range.from.toLocaleString()} - ${
+                option.price_range.to.toLocaleString()
+              }
+            </div>
+            <div class="text-muted-foreground" id="price-label">per month</div>
+            <div class="text-sm text-muted-foreground mt-1">
+              Fees & Parking: ${option.fees_and_parking_price.toLocaleString()}
+            </div>
+          </div>
+
+          <!-- Reference Note -->
+          <div
+            class="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4"
+          >
+            <div class="flex items-start gap-3">
+              <div class="text-amber-600 dark:text-amber-400 mt-0.5">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clip-rule="evenodd"></path>
+                </svg>
+              </div>
+              <div class="text-sm text-amber-800 dark:text-amber-200">
+                <strong>Important Note:</strong> All prices, images, and videos shown
+                are for reference purposes only. The actual price and final details
+                will be confirmed during the tour, taking into account the specific
+                apartment layout and availability.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Promotions -->
+        <div>
+          {
+            option.building_promotions &&
+              option.building_promotions.length > 0 && (
+                <PromotionsSection
+                  promotions={option.building_promotions}
+                  priceRange={option.price_range}
+                  client:load
+                />
+              )
+          }
+        </div>
+
+        <!-- Amenities -->
+        <div class="space-y-3">
+          <h2 class="text-2xl font-semibold">Amenities</h2>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {
+              option.building_amenities?.map((amenity) => (
+                <div class="flex items-center gap-2 text-muted-foreground">
+                  <div class="h-2 w-2 rounded-full bg-primary" />
+                  <span>{amenity}</span>
+                </div>
+              ))
+            }
+          </div>
+        </div>
+
+        <!-- Feedback -->
+        <FeedbackForm
+          optionId={option.id}
+          initialFeedback={option.feedback || ""}
+          client:load
+        />
+      </div>
+    </div>
+  </section>
+</Layout>

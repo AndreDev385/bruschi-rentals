@@ -35,8 +35,8 @@ const ApartmentTypeStep: React.FC<ApartmentTypeStepProps> = ({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-xl font-semibold text-obsidian mb-2">
-          What type of apartment are you looking for?
+        <h3 className="text-xl font-semibold text-obsidian mb-4">
+          What size apartment?
         </h3>
       </div>
 

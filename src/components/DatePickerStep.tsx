@@ -34,8 +34,8 @@ const DatePickerStep: React.FC<DatePickerStepProps> = ({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-xl font-semibold text-obsidian mb-2">
-          When would you like to move in?
+        <h3 className="text-xl font-semibold text-obsidian mb-4">
+          When are you move in?
         </h3>
       </div>
 

@@ -1,11 +1,12 @@
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { PhoneInputComponent } from "@/components/ui/PhoneInput";
+import { MultiNoteInput } from "@/components/ui/multi-note-input";
 import type { FormData, Neighborhood } from "@/types";
-import { Plus } from "lucide-react";
+
 import { useState, useEffect, useCallback } from "react";
 import { useStepCompletion } from "@/lib/utils";
+import { isValidPhoneNumber } from "libphonenumber-js";
 
 interface ContactFormStepProps {
   onComplete: (data: {
@@ -13,7 +14,7 @@ interface ContactFormStepProps {
     email: string;
     phoneNumber: string;
     tourType: "OnSite" | "Virtual";
-    notes?: string;
+    notes?: string[];
   }) => void;
   formData: FormData;
   neighborhoods?: Neighborhood[];
@@ -26,16 +27,16 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({ onComplete }) => {
     email: string;
     phoneNumber: string;
     tourType: "OnSite" | "Virtual" | "";
-    notes: string;
+    notes: string[];
   }>({
     name: "",
     email: "",
     phoneNumber: "",
     tourType: "",
-    notes: "",
+    notes: [],
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showNotes, setShowNotes] = useState(false);
+
   const [isCompleted, setIsCompleted] = useState(false);
 
   const validateForm = useCallback(() => {
@@ -53,6 +54,8 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({ onComplete }) => {
 
     if (!formValues.phoneNumber.trim()) {
       newErrors.phoneNumber = "Phone number is required";
+    } else if (!isValidPhoneNumber(formValues.phoneNumber)) {
+      newErrors.phoneNumber = "Please enter a valid phone number";
     }
 
     if (!formValues.tourType) {
@@ -69,6 +72,7 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({ onComplete }) => {
       formValues.email.trim() &&
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formValues.email) &&
       formValues.phoneNumber.trim() &&
+      isValidPhoneNumber(formValues.phoneNumber) &&
       formValues.tourType
     );
   }, [formValues]);
@@ -82,7 +86,7 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({ onComplete }) => {
         email: formValues.email,
         phoneNumber: formValues.phoneNumber,
         tourType: formValues.tourType as "OnSite" | "Virtual",
-        notes: formValues.notes || undefined,
+        notes: formValues.notes.length > 0 ? formValues.notes : undefined,
       });
       setIsCompleted(true);
       setStepCompleted(5, true); // ContactFormStep is step 5
@@ -101,13 +105,15 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({ onComplete }) => {
         email: formValues.email,
         phoneNumber: formValues.phoneNumber,
         tourType: formValues.tourType as "OnSite" | "Virtual",
-        notes: formValues.notes || undefined,
+        notes: formValues.notes.length > 0 ? formValues.notes : undefined,
       });
     }
   };
 
   const handleInputChange = (field: string, value: string) => {
-    setFormValues((prev) => ({ ...prev, [field]: value }));
+    const sanitizedValue =
+      field === "email" ? value.trim().toLowerCase() : value.trim();
+    setFormValues((prev) => ({ ...prev, [field]: sanitizedValue }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
     }
@@ -116,67 +122,61 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({ onComplete }) => {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-xl font-semibold text-obsidian mb-2">
-          Almost there! Tell us how to reach you
+        <h3 className="text-xl font-semibold text-obsidian mb-4">
+          How can we reach you?
         </h3>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <Label htmlFor="name" className="text-obsidian">
-            Full Name *
+          <Label htmlFor="name">
+            <Input
+              id="name"
+              type="text"
+              value={formValues.name}
+              onChange={(e) => handleInputChange("name", e.target.value)}
+              className={errors.name ? "border-red-500" : ""}
+              placeholder="Your Full Name *"
+            />
           </Label>
-          <Input
-            id="name"
-            type="text"
-            value={formValues.name}
-            onChange={(e) => handleInputChange("name", e.target.value)}
-            className={errors.name ? "border-red-500" : ""}
-            placeholder="John Doe"
-          />
           {errors.name && (
             <p className="text-sm text-red-500 mt-1">{errors.name}</p>
           )}
         </div>
 
         <div>
-          <Label htmlFor="email" className="text-obsidian">
-            Email Address *
+          <Label htmlFor="email">
+            <Input
+              id="email"
+              type="email"
+              value={formValues.email}
+              onChange={(e) => handleInputChange("email", e.target.value)}
+              className={errors.email ? "border-red-500" : ""}
+              placeholder="Email Address *"
+            />
           </Label>
-          <Input
-            id="email"
-            type="email"
-            value={formValues.email}
-            onChange={(e) => handleInputChange("email", e.target.value)}
-            className={errors.email ? "border-red-500" : ""}
-            placeholder="john@example.com"
-          />
           {errors.email && (
             <p className="text-sm text-red-500 mt-1">{errors.email}</p>
           )}
         </div>
 
         <div>
-          <Label htmlFor="phoneNumber" className="text-obsidian">
-            Phone Number *
-          </Label>
-          <Input
-            id="phoneNumber"
-            type="tel"
+          <PhoneInputComponent
+            name="phoneNumber"
             value={formValues.phoneNumber}
-            onChange={(e) => handleInputChange("phoneNumber", e.target.value)}
-            className={errors.phoneNumber ? "border-red-500" : ""}
-            placeholder="(555) 123-4567"
+            onChange={(value) => handleInputChange("phoneNumber", value)}
+            required
+            aria-invalid={!!errors.phoneNumber}
+            aria-describedby={errors.phoneNumber ? "phone-error" : undefined}
           />
           {errors.phoneNumber && (
-            <p className="text-sm text-red-500 mt-1">{errors.phoneNumber}</p>
+            <p id="phone-error" className="text-sm text-red-500 mt-1">
+              {errors.phoneNumber}
+            </p>
           )}
         </div>
 
         <fieldset>
-          <legend className="text-obsidian font-medium mb-4">
-            Tour Type *
-          </legend>
           <div className="grid grid-cols-2 gap-4">
             <label
               htmlFor="tourType-onsite"
@@ -192,11 +192,11 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({ onComplete }) => {
                 className="sr-only"
               />
               {formValues.tourType === "OnSite" ? (
-                <div className="top-0 right-0 size-4 bg-primary rounded-full mx-auto mb-2" />
+                <div className="top-0 left-0 size-4 bg-primary shadow-hole rounded-full relative" />
               ) : (
-                <div className="top-0 right-0 size-4 border-2 border-gray-300 rounded-full mx-auto mb-2" />
+                <div className="top-0 left-0 size-4 bg-soft-dark shadow-hole rounded-full relative" />
               )}
-              <div className="flex justify-center mb-2">
+              <div className="flex justify-center">
                 <img
                   src="/icons8-location-100.png"
                   alt=""
@@ -219,11 +219,11 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({ onComplete }) => {
                 className="sr-only"
               />
               {formValues.tourType === "Virtual" ? (
-                <div className="top-0 right-0 size-4 bg-primary rounded-full mx-auto mb-2" />
+                <div className="top-0 left-0 size-4 bg-primary shadow-hole rounded-full relative" />
               ) : (
-                <div className="top-0 right-0 size-4 border-2 border-gray-300 rounded-full mx-auto mb-2" />
+                <div className="top-0 left-0 size-4 bg-soft-dark shadow-hole rounded-full relative" />
               )}
-              <div className="flex justify-center mb-2">
+              <div className="flex justify-center">
                 <img src="/icons8-camera-100.png" alt="" className="size-24" />
               </div>
               <p className="text-mocha font-medium">Virtual tour</p>
@@ -234,30 +234,12 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({ onComplete }) => {
           )}
         </fieldset>
 
-        {showNotes ? (
-          <div>
-            <Label htmlFor="notes" className="text-obsidian">
-              Additional Notes
-            </Label>
-            <Textarea
-              id="notes"
-              value={formValues.notes}
-              onChange={(e) => handleInputChange("notes", e.target.value)}
-              placeholder="Any special requirements or preferences..."
-              rows={3}
-              className="resize-none"
-            />
-          </div>
-        ) : (
-          <Button
-            variant="ghost"
-            onClick={() => setShowNotes(true)}
-            className="w-full"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Any additional information
-          </Button>
-        )}
+        <MultiNoteInput
+          notes={formValues.notes}
+          onNotesChange={(notes) =>
+            setFormValues((prev) => ({ ...prev, notes }))
+          }
+        />
       </form>
     </div>
   );

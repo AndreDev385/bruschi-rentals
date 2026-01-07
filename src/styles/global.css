@@ -6,15 +6,6 @@
   font-family: "Bell" sans-serif;
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: "Quinn", sans-serif;
-}
-
 @theme {
   --color-obsidian: #261d18;
 
@@ -121,7 +112,7 @@ h6 {
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: oklch(58.6% 0.253 17.585);
-  --color-primary-foreground: oklch(64.5% 0.246 16.439);
+  --color-primary-foreground: white;
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);

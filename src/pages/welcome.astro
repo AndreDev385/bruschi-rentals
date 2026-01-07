@@ -1,0 +1,112 @@
+---
+export const prerender = false;
+
+import { Image } from "astro:assets";
+import Layout from "@/layouts/Layout.astro";
+import { getSession } from "@/lib/auth";
+import Hero from "@/assets/hero.jpg";
+
+const session = await getSession(Astro);
+
+if (!session) {
+  return Astro.redirect("/login");
+}
+
+// Set welcome seen cookie server-side
+Astro.cookies.set("welcome_seen", "true", {
+  path: "/",
+  httpOnly: false, // Allow client access if needed
+  secure: import.meta.env.PROD,
+  sameSite: "lax",
+});
+
+const url = new URL(Astro.request.url);
+const search = url.search;
+---
+
+<Layout>
+  <section class="relative w-full min-h-screen flex items-center py-20">
+    <div class="absolute inset-0 z-0">
+      <div
+        class="absolute inset-0 bg-gradient-to-b from-black/70 via-obsidian/70 to-black/70"
+      >
+      </div>
+      <Image
+        src={Hero}
+        alt="Hero"
+        loading="eager"
+        class="w-full h-full object-cover"
+      />
+    </div>
+
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+      <div class="max-w-2xl mx-auto text-center">
+        <div id="confetti-container" class="mb-8"></div>
+
+        <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+          <h1 class="text-4xl font-bold text-obsidian mb-4">
+            Welcome to Bruschi Rentals! 🎉
+          </h1>
+          <p class="text-xl text-mocha mb-6">
+            Congratulations! You've successfully logged in to your personalized
+            portal. Here you'll find rental options curated just for you.
+          </p>
+
+          <div class="space-y-4">
+            <p class="text-lg text-obsidian">
+              Your realtor will assign the best options based on your
+              preferences, and you'll be able to view them, mark favorites, and
+              get updates here.
+            </p>
+
+            <div class="bg-soft-light p-6 rounded-lg">
+              <h3 class="text-lg font-semibold text-primary mb-2">
+                What to expect:
+              </h3>
+              <ul class="text-left text-mocha space-y-1">
+                <li>• Personalized rental options from your realtor</li>
+                <li>• High-quality photos and detailed information</li>
+                <li>• Easy favorite marking and feedback</li>
+                <li>• Direct communication with Paulina and her team</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <a
+          href={`/portal${search}`}
+          class="inline-block px-8 py-4 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 transition-all duration-300 transform hover:scale-105"
+        >
+          Enter My Portal
+        </a>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import confetti from "canvas-confetti";
+
+  // Fire confetti on page load
+  confetti({
+    particleCount: 100,
+    spread: 70,
+    origin: { y: 0.6 },
+  });
+
+  // Additional bursts for celebration
+  setTimeout(() => {
+    confetti({
+      particleCount: 50,
+      angle: 60,
+      spread: 55,
+      origin: { x: 0 },
+    });
+    confetti({
+      particleCount: 50,
+      angle: 120,
+      spread: 55,
+      origin: { x: 1 },
+    });
+  }, 500);
+</script>

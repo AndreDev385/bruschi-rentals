@@ -1,9 +1,9 @@
 ---
 import { ClientRouter } from "astro:transitions";
+import { Toaster } from "sonner";
 
 import "../styles/global.css";
 import "animate.css";
-import Footer from "../components/Footer.astro";
 ---
 
 <!doctype html>
@@ -29,7 +29,7 @@ import Footer from "../components/Footer.astro";
   </head>
   <body>
     <slot />
-    <Footer />
+    <Toaster client:load />
   </body>
 </html>
 

@@ -8,14 +8,22 @@ if (!API_URL) {
 }
 
 export async function listNeighborhoods(): Promise<Neighborhood[]> {
-  const response = await fetch(`${API_URL}/api/v1/neighborhoods`);
+  try {
+    const response = await fetch(`${API_URL}/api/v1/neighborhoods`);
 
-  if (!response.ok) {
-    throw new Error(
-      `Failed to fetch neighborhoods: ${response.status} ${response.statusText}`,
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch neighborhoods: ${response.status} ${response.statusText}`,
+      );
+    }
+
+    const data = await response.json();
+    return NeighborhoodSchema.array().parse(data);
+  } catch (error) {
+    console.warn(
+      "Failed to fetch neighborhoods from API, using mock data:",
+      error,
     );
+    throw error;
   }
-
-  const data = await response.json();
-  return NeighborhoodSchema.array().parse(data);
 }

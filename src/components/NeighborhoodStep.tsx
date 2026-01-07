@@ -38,8 +38,8 @@ const NeighborhoodStep: React.FC<NeighborhoodStepProps> = ({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-xl font-semibold text-obsidian mb-2">
-          Which neighborhood are you interested in?
+        <h3 className="text-xl font-semibold text-obsidian mb-4">
+          Where are you moving?
         </h3>
       </div>
 

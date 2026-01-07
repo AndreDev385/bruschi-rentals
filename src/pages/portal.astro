@@ -1,0 +1,238 @@
+---
+export const prerender = false;
+
+import Layout from "@/layouts/Layout.astro";
+import OptionCard from "@/components/portal/OptionCard";
+import { getSession, setSession } from "@/lib/auth";
+import { listClientOptions } from "@/services/options.server";
+import { fetchClientPreferences } from "@/services/preferences.server";
+import { handleAuthError } from "@/lib/auth-utils";
+import type { ClientOptionRead, ClientPreferencesRead } from "@/types";
+import {
+  Home,
+  LogOut,
+  Calendar,
+  Camera,
+  MapPin,
+  DollarSign,
+  Notebook,
+} from "lucide-react";
+
+const session = await getSession(Astro);
+
+if (!session) {
+  return Astro.redirect("/login");
+}
+
+const url = new URL(Astro.request.url);
+const search = url.search;
+
+const cookies = Astro.request.headers.get("cookie") || "";
+const hasSeenWelcome = cookies.includes("welcome_seen=true");
+
+if (!hasSeenWelcome) {
+  console.log("First time access, redirecting to welcome");
+  return Astro.redirect("/welcome");
+}
+
+let options: ClientOptionRead[] = [];
+
+try {
+  options = await listClientOptions(session.accessToken);
+  // TODO remove this line
+  options = options.map((op) => {
+    op.building_images = [
+      ...op.building_images,
+      "https://res.cloudinary.com/dnlhvunnf/image/upload/v1766094234/fk0s5oeiootf0vjd7ypb.jpg",
+      "https://res.cloudinary.com/dnlhvunnf/image/upload/v1766094227/qaspwbdtmhhnwzxgulvl.jpg",
+      "https://res.cloudinary.com/dnlhvunnf/image/upload/v1766094223/awyn1ty5g9g0hwniqerl.jpg",
+    ];
+    return op;
+  });
+} catch (error) {
+  const authResult = await handleAuthError(
+    error as Error,
+    Astro,
+    session.refreshToken,
+  );
+
+  if (authResult.shouldRetry && authResult.newTokens) {
+    const updatedSession = {
+      ...session,
+      accessToken: authResult.newTokens.accessToken,
+      refreshToken: authResult.newTokens.refreshToken,
+      expiresIn: authResult.newTokens.expiresIn,
+    };
+    setSession(Astro, updatedSession);
+
+    try {
+      options = await listClientOptions(updatedSession.accessToken);
+    } catch (retryError) {
+      console.error("Retry failed:", retryError);
+      return Astro.redirect("/login");
+    }
+  } else if (authResult.shouldRedirect) {
+    return Astro.redirect("/login");
+  } else {
+    options = [];
+  }
+}
+
+let preferences: ClientPreferencesRead[] = [];
+let latestPreference: ClientPreferencesRead | null = null;
+
+try {
+  preferences = await fetchClientPreferences(session.accessToken);
+  latestPreference = preferences.length > 0 ? preferences[0] : null;
+} catch (error) {
+  latestPreference = null;
+}
+---
+
+<Layout>
+  <header class="py-4 border-b border-border">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="flex justify-between items-center">
+        <a
+          href={`/${search}`}
+          class="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <img src="/logos/isotype.svg" alt="Bruschi Rentals" class="h-6 w-6" />
+          <span>Back to Home</span>
+        </a>
+        <a
+          href={`/logout${search}`}
+          class="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <LogOut />
+        </a>
+      </div>
+    </div>
+  </header>
+  <section class="w-full py-12 bg-background min-h-screen">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="max-w-6xl mx-auto">
+        <div class="mb-12 text-center">
+          <h1 class="text-4xl font-bold text-foreground mb-4">
+            My Rental Options
+          </h1>
+          <p class="text-muted-foreground text-lg mb-4">
+            {
+              options.length > 0
+                ? "Curated rental options tailored to your preferences by your realtor."
+                : "Your realtor is currently looking for the best fits for you based on your preferences."
+            }
+          </p>
+          <p class="text-muted-foreground">
+            {
+              options.length > 0
+                ? "Based on your selected criteria, we've found the best matches for your ideal home."
+                : "We'll notify you as soon as personalized options become available."
+            }
+          </p>
+        </div>
+
+        {
+          latestPreference && (
+            <div class="bg-muted/30 rounded-lg p-6 mb-8">
+              <h2 class="text-xl font-semibold text-foreground mb-6">
+                Your Criteria
+              </h2>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="flex items-center space-x-3 p-4 bg-card rounded-lg shadow-s hover:shadow-m transition-shadow">
+                  <MapPin />
+                  <div>
+                    <div class="text-sm font-medium text-gray-500">
+                      Neighborhood
+                    </div>
+                    <div class="text-gray-900">
+                      {latestPreference.neighborhood_name}
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-3 p-4 bg-card rounded-lg shadow-s hover:shadow-m transition-shadow">
+                  <Home />
+                  <div>
+                    <div class="text-sm font-medium text-gray-500">
+                      Apartment Type
+                    </div>
+                    <div class="text-gray-900">
+                      {latestPreference.apartment_type
+                        .replace(/([A-Z])/g, " $1")
+                        .trim()}
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-3 p-4 bg-card rounded-lg shadow-s hover:shadow-m transition-shadow">
+                  <DollarSign />
+                  <div>
+                    <div class="text-sm font-medium text-gray-500">Budget</div>
+                    <div class="text-gray-900">
+                      ${latestPreference.budget.toLocaleString()}
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-3 p-4 bg-card rounded-lg shadow-s hover:shadow-m transition-shadow">
+                  <Camera />
+                  <div>
+                    <div class="text-sm font-medium text-gray-500">
+                      Tour Type
+                    </div>
+                    <div class="text-gray-900">
+                      {latestPreference.tour_type}
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-3 p-4 bg-card rounded-lg shadow-s hover:shadow-m transition-shadow">
+                  <Calendar />
+                  <div>
+                    <div class="text-sm font-medium text-gray-500">
+                      Move-in Date
+                    </div>
+                    <div class="text-gray-900">
+                      {new Date(
+                        latestPreference.move_in_date,
+                      ).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+                {latestPreference.notes.length > 0 && (
+                  <div class="flex items-start space-x-3 p-3 bg-white rounded-md shadow-sm md:col-span-2">
+                    <Notebook />
+                    <div>
+                      <div class="text-sm font-medium text-gray-500">Notes</div>
+                      <div class="text-gray-900">
+                        {latestPreference.notes.join(", ")}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )
+        }
+
+        {
+          options.length === 0 ? (
+            <div class="text-center py-12">
+              <h2 class="text-2xl font-bold text-foreground mb-4">
+                No Options Yet
+              </h2>
+              <p class="text-muted-foreground mb-4">
+                Your realtor is currently searching for the best matches based
+                on your preferences.
+              </p>
+              <p class="text-sm text-muted-foreground">Check back soon.</p>
+            </div>
+          ) : (
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {options.map((option) => (
+                <OptionCard option={option} client:load />
+              ))}
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </section>
+</Layout>

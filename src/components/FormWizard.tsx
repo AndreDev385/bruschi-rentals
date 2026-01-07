@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { actions } from "astro:actions";
 import NeighborhoodStep from "./NeighborhoodStep";
 import ApartmentTypeStep from "./ApartmentTypeStep";
 import BudgetStep from "./BudgetStep";
@@ -14,7 +15,7 @@ import type { FormData, Neighborhood } from "@/types";
 
 const steps = [
   { id: 1, component: NeighborhoodStep, title: "Choose Neighborhood" },
-  { id: 2, component: ApartmentTypeStep, title: "Apartment Type" },
+  { id: 2, component: ApartmentTypeStep, title: "Apartment Size" },
   { id: 3, component: BudgetStep, title: "Budget" },
   { id: 4, component: DatePickerStep, title: "Move-in Date" },
   { id: 5, component: ContactFormStep, title: "Contact Information" },
@@ -54,6 +55,27 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
   };
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Form persistence
+  useEffect(() => {
+    const saved = localStorage.getItem("formData");
+    if (saved) {
+      try {
+        setFormData(JSON.parse(saved));
+      } catch (error) {
+        console.warn("Failed to restore form data:", error);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("formData", JSON.stringify(formData));
+  }, [formData]);
+
+  // Clear on success
+  const clearPersistence = () => {
+    localStorage.removeItem("formData");
+  };
+
   // Read origin from URL query parameters
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -73,16 +95,36 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
     const nid = neighborhoodId || formData.neighborhoodId;
     const atype = apartmentType || formData.apartmentType;
     if (!nid || !atype) return;
+
+    const retryFetch = async (attempts: number) => {
+      try {
+        const range = await fetchPriceRange(nid, atype);
+        return {
+          min: range.min_from,
+          max: range.max_to,
+          available: range.available,
+        };
+      } catch (error) {
+        if (attempts > 1) {
+          await new Promise((resolve) =>
+            setTimeout(resolve, 1000 * (4 - attempts)),
+          ); // 3s, 2s, 1s
+          return retryFetch(attempts - 1);
+        }
+        throw error;
+      }
+    };
+
     setIsLoadingPriceRange(true);
     setPriceRange(null);
     try {
-      const range = await fetchPriceRange(nid, atype);
-      setPriceRange({
-        min: range.min_from,
-        max: range.max_to,
-        available: range.available,
-      });
+      const range = await retryFetch(3);
+      setPriceRange(range);
     } catch (error) {
+      console.warn("Failed to fetch price range after retries:", error);
+      toast.warning(
+        "Unable to load price suggestions. You can still enter a budget manually.",
+      );
       setPriceRange(null);
     } finally {
       setIsLoadingPriceRange(false);
@@ -148,32 +190,34 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
 
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/submit-preferences", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...formData, origin }),
+      await actions.submitPreferences({
+        ...(formData as Required<Omit<typeof formData, "notes">>),
+        origin,
+        notes: formData.notes,
       });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        toast.success("Your information has been sent successfully!");
-        // Redirect to landing page after successful submission
-        setTimeout(() => {
-          window.location.href = "/";
-        }, 2000); // Small delay to let user see the success message
-      } else {
-        if (data.error === "EMAIL_EXISTS") {
+      toast.success("Your information has been sent successfully!");
+      clearPersistence();
+      // Redirect to landing page after successful submission
+      setTimeout(() => {
+        window.location.href = "/";
+      }, 2000); // Small delay to let user see the success message
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        "message" in error
+      ) {
+        const e = error as { code: string; message: string };
+        if (e.code === "BAD_REQUEST") {
           toast.error("You're already registered! Please proceed to login.");
         } else {
-          toast.error("Failed to submit preferences.");
+          toast.error(e.message);
         }
+      } else {
+        toast.error("An error occurred while submitting.");
       }
-    } catch (error) {
       console.error("Submit error:", error);
-      toast.error("An error occurred while submitting.");
     } finally {
       setIsSubmitting(false);
     }
@@ -183,9 +227,9 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
 
   return (
     <StepCompletionContext.Provider value={stepCompletionContextValue}>
-      <div className="bg-soft rounded-2xl shadow-l p-4">
+      <div className="bg-soft rounded-2xl shadow-l p-8">
         {/* Progress indicator */}
-        <div className="mb-8">
+        <div className="mb-4">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-obsidian">
               Step {currentStep} of {totalSteps}
@@ -245,8 +289,6 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
                 : "Next"}
           </Button>
         </div>
-
-        <Toaster position="top-center" richColors />
       </div>
     </StepCompletionContext.Provider>
   );
