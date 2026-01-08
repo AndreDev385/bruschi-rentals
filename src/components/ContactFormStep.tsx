@@ -112,7 +112,7 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({ onComplete }) => {
 
   const handleInputChange = (field: string, value: string) => {
     const sanitizedValue =
-      field === "email" ? value.trim().toLowerCase() : value.trim();
+      field === "email" ? value.trim().toLowerCase() : value;
     setFormValues((prev) => ({ ...prev, [field]: sanitizedValue }));
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: "" }));
