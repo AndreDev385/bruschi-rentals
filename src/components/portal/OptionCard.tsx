@@ -35,8 +35,6 @@ const OptionCard = ({ option }: OptionCardProps) => {
   const [isFavorited, setIsFavorited] = useState(option.favorited);
   const imgRef = useRef<HTMLImageElement>(null);
 
-  const search = window.location.search;
-
   useEffect(() => {
     if (imgRef.current?.complete) {
       setImageLoaded((prev) => {
@@ -80,7 +78,7 @@ const OptionCard = ({ option }: OptionCardProps) => {
   const currentImage = option.building_images[currentImageIndex];
 
   return (
-    <a href={`/portal/${option.id}${search}`}>
+    <a href={`/portal/${option.id}`}>
       <Card className="overflow-hidden hover:shadow-m transition-shadow group cursor-pointer">
         {/* Image Carousel */}
         <div className="relative aspect-[4/3] bg-muted overflow-hidden">
