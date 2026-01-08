@@ -197,10 +197,8 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
       });
       toast.success("Your information has been sent successfully!");
       clearPersistence();
-      // Redirect to landing page after successful submission
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 2000); // Small delay to let user see the success message
+      // Redirect to account created page
+      window.location.href = "/account-created";
     } catch (error: unknown) {
       if (
         error &&
