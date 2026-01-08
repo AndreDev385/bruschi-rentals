@@ -41,16 +41,6 @@ let option: ClientOptionDetailed;
 
 try {
   option = await fetchClientOption(id, accessToken);
-  option.building_images = [
-    ...option.building_images,
-    "https://res.cloudinary.com/dnlhvunnf/image/upload/v1766094234/fk0s5oeiootf0vjd7ypb.jpg",
-    "https://res.cloudinary.com/dnlhvunnf/image/upload/v1766094227/qaspwbdtmhhnwzxgulvl.jpg",
-    "https://res.cloudinary.com/dnlhvunnf/image/upload/v1766094223/awyn1ty5g9g0hwniqerl.jpg",
-  ];
-  option.building_videos = [
-    ...option.building_videos,
-    "https://res.cloudinary.com/dnlhvunnf/video/upload/v1766095963/pow4d2rqdr3fbakwwxui.mp4",
-  ];
 } catch (error) {
   const authResult = await handleAuthError(
     error as Error,

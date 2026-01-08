@@ -39,16 +39,6 @@ let options: ClientOptionRead[] = [];
 
 try {
   options = await listClientOptions(session.accessToken);
-  // TODO remove this line
-  options = options.map((op) => {
-    op.building_images = [
-      ...op.building_images,
-      "https://res.cloudinary.com/dnlhvunnf/image/upload/v1766094234/fk0s5oeiootf0vjd7ypb.jpg",
-      "https://res.cloudinary.com/dnlhvunnf/image/upload/v1766094227/qaspwbdtmhhnwzxgulvl.jpg",
-      "https://res.cloudinary.com/dnlhvunnf/image/upload/v1766094223/awyn1ty5g9g0hwniqerl.jpg",
-    ];
-    return op;
-  });
 } catch (error) {
   const authResult = await handleAuthError(
     error as Error,
@@ -97,7 +87,7 @@ try {
           href={`/${search}`}
           class="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
         >
-          <img src="/logos/isotype.svg" alt="Bruschi Rentals" class="h-6 w-6" />
+          <img src="logos/isotype.svg" alt="Bruschi Rentals" class="h-6 w-6" />
           <span>Back to Home</span>
         </a>
         <a

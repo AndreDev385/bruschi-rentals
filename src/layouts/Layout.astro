@@ -1,6 +1,7 @@
 ---
 import { ClientRouter } from "astro:transitions";
 import { Toaster } from "sonner";
+import "sonner/dist/styles.css";
 
 import "../styles/global.css";
 import "animate.css";
@@ -29,7 +30,7 @@ import "animate.css";
   </head>
   <body>
     <slot />
-    <Toaster client:load />
+    <Toaster client:idle />
   </body>
 </html>
 

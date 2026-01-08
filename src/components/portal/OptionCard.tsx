@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { actions } from "astro:actions";
 import type { ClientOptionRead } from "@/types";
 import { Button } from "../ui/button";
+import { toast } from "sonner";
 
 interface OptionCardProps {
   option: ClientOptionRead;
@@ -69,16 +70,22 @@ const OptionCard = ({ option }: OptionCardProps) => {
       const result = await actions.toggleFavorite({ optionId: option.id });
       if (result.data) {
         setIsFavorited(result.data.favorited);
+        toast.success(
+          result.data.favorited
+            ? "Added to favorites"
+            : "Removed from favorites",
+        );
       }
     } catch (error) {
       console.error("Error updating favorite:", error);
+      toast.error("Failed to update favorite status. Please try again.");
     }
   };
 
   const currentImage = option.building_images[currentImageIndex];
 
   return (
-    <a href={`/portal/${option.id}`}>
+    <a href={`/portal/${option.id}`} data-astro-prefetch="load">
       <Card className="overflow-hidden hover:shadow-m transition-shadow group cursor-pointer">
         {/* Image Carousel */}
         <div className="relative aspect-[4/3] bg-muted overflow-hidden">
