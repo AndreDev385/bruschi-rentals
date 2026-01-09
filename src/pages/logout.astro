@@ -1,14 +1,9 @@
 ---
-import { getLogoutUrl } from "@/lib/auth";
+export const prerender = false;
 
-// Clear the session cookie
-Astro.cookies.set("auth-session", "", {
-  maxAge: 0,
-  httpOnly: true,
-  secure: import.meta.env.PROD,
-  sameSite: "strict",
-  path: "/",
-});
+import { clearSession, getLogoutUrl } from "@/lib/auth";
+
+clearSession(Astro);
 
 return Astro.redirect(getLogoutUrl());
 ---

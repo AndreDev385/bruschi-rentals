@@ -79,11 +79,9 @@ export const server = {
 
         if (!response.ok) {
           // Handle specific error case for existing email
-          if (response.status === 400) {
+          if (response.status === 409) {
             const errorData = await response.json();
-            if (
-              errorData.message === "A client with this email already exists"
-            ) {
+            if (errorData.error === "email already exists") {
               throw new ActionError({
                 code: "BAD_REQUEST",
                 message: "You're already registered! Please proceed to login.",
