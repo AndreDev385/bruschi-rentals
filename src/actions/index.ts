@@ -78,16 +78,27 @@ export const server = {
         });
 
         if (!response.ok) {
+          const errorData = await response.json();
+
           // Handle specific error case for existing email
-          if (response.status === 409) {
-            const errorData = await response.json();
-            if (errorData.error === "email already exists") {
-              throw new ActionError({
-                code: "BAD_REQUEST",
-                message: "You're already registered! Please proceed to login.",
-              });
-            }
+          if (
+            response.status === 409 &&
+            errorData.error === "email already exists"
+          ) {
+            throw new ActionError({
+              code: "BAD_REQUEST",
+              message: "You're already registered! Please proceed to login.",
+            });
           }
+
+          // Handle validation errors (400)
+          if (response.status === 400) {
+            throw new ActionError({
+              code: "BAD_REQUEST",
+              message: errorData.error || "Invalid request data.",
+            });
+          }
+
           throw new ActionError({
             code: "BAD_REQUEST",
             message: "Failed to submit preferences.",
