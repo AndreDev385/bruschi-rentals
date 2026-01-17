@@ -3,11 +3,13 @@ export const prerender = false;
 
 import Layout from "@/layouts/Layout.astro";
 import OptionCard from "@/components/portal/OptionCard";
+import { PhoneNumberPrompt } from "@/components/PhoneNumberPrompt";
 import { getSession, setSession } from "@/lib/auth";
 import { listClientOptions } from "@/services/options.server";
 import { fetchClientPreferences } from "@/services/preferences.server";
 import { handleAuthError } from "@/lib/auth-utils";
 import type { ClientOptionRead, ClientPreferencesRead } from "@/types";
+import { getSecret } from "astro:env/server";
 import {
   Home,
   LogOut,
@@ -17,6 +19,8 @@ import {
   DollarSign,
   Notebook,
 } from "lucide-react";
+
+const API_URL = getSecret("API_BASE_URL");
 
 const session = await getSession(Astro);
 
@@ -33,6 +37,23 @@ const hasSeenWelcome = cookies.includes("welcome_seen=true");
 if (!hasSeenWelcome) {
   console.log("First time access, redirecting to welcome");
   return Astro.redirect("/welcome");
+}
+
+// Check if client needs to add phone number (migration support)
+let needsPhoneNumber = false;
+try {
+  const response = await fetch(`${API_URL}/api/v1/clients/me`, {
+    headers: { Authorization: `Bearer ${session.accessToken}` },
+  });
+
+  if (response.ok) {
+    const client = await response.json();
+    needsPhoneNumber = !client.phone_number;
+  }
+} catch (error) {
+  console.error("Failed to check client phone number:", error);
+  // Don't block user if check fails, continue to portal
+  needsPhoneNumber = false;
 }
 
 let options: ClientOptionRead[] = [];
@@ -80,6 +101,32 @@ try {
 ---
 
 <Layout>
+  {
+    needsPhoneNumber && (
+      <PhoneNumberPrompt
+        client:only="react"
+        email={session.user.email || ""}
+        onSubmit={async (phoneNumber: string) => {
+          const response = await fetch(`${API_URL}/api/v1/clients/me/phone`, {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${session.accessToken}`,
+            },
+            body: JSON.stringify({ phone_number: phoneNumber }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || "Failed to add phone number");
+          }
+
+          // Reload page to dismiss prompt
+          window.location.reload();
+        }}
+      />
+    )
+  }
   <header class="py-4 border-b border-border">
     <div class="max-w-4xl mx-auto px-6">
       <div class="flex justify-between items-center">

@@ -1,0 +1,197 @@
+---
+export const prerender = false;
+
+import { Image } from "astro:assets";
+import Layout from "@/layouts/Layout.astro";
+import PublicLayout from "@/layouts/PublicLayout.astro";
+import Hero from "@/assets/hero.jpg";
+---
+
+<Layout>
+  <PublicLayout>
+    <section class="relative w-full min-h-screen flex items-center py-20">
+      <div class="absolute inset-0 z-0">
+        <div
+          class="absolute inset-0 bg-gradient-to-b from-black/70 via-obsidian/70 to-black/70"
+        >
+        </div>
+        <Image
+          src={Hero}
+          alt="Hero"
+          loading="eager"
+          class="w-full h-full object-cover"
+        />
+      </div>
+
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+        <div class="max-w-4xl mx-auto">
+          <div
+            class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-m p-8 md:p-12"
+          >
+            <h1
+              class="text-3xl md:text-4xl font-bold text-obsidian mb-8 text-center"
+            >
+              Terms of Service
+            </h1>
+
+            <div class="prose prose-lg max-w-none text-obsidian">
+              <p class="text-xl font-semibold text-primary mb-6">
+                Welcome to Bruschi Rentals. By using our services, you agree to
+                these terms.
+              </p>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                Our Service
+              </h2>
+              <p>
+                Bruschi Rentals provides personalized rental assistance in
+                Miami. We help you find your dream home by collecting your
+                preferences through a structured process and matching you with
+                relevant rental options.
+              </p>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                How It Works
+              </h2>
+              <ol class="list-decimal list-inside space-y-2">
+                <li>
+                  You provide your preferences through our multi-step form
+                  (neighborhood, apartment type, budget, move-in date, and
+                  contact information)
+                </li>
+                <li>
+                  We save your information in our secure database for processing
+                </li>
+                <li>
+                  Our team reviews your preferences and sends you personalized
+                  rental options and relevant information
+                </li>
+                <li>
+                  You can access a secure portal to view your options using
+                  passwordless authentication via SMS or email
+                </li>
+                <li>
+                  We provide ongoing support throughout your rental search
+                  process
+                </li>
+              </ol>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                Information We Collect
+              </h2>
+              <p>When you submit our form, we collect:</p>
+              <ul class="list-disc list-inside space-y-2 ml-4">
+                <li>
+                  Name and contact information (phone number, optional email)
+                </li>
+                <li>
+                  Rental preferences (neighborhood, apartment type, budget,
+                  move-in date, tour type)
+                </li>
+                <li>Additional notes you may provide</li>
+              </ul>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                How We Use Your Information
+              </h2>
+              <p>Your information is used exclusively for:</p>
+              <ul class="list-disc list-inside space-y-2 ml-4">
+                <li>
+                  Sending you relevant rental options and information based on
+                  your preferences
+                </li>
+                <li>Business organization and operational purposes</li>
+                <li>Automating access to your personalized rental portal</li>
+                <li>
+                  Facilitating communication regarding rental opportunities
+                </li>
+              </ul>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                Authentication and Portal Access
+              </h2>
+              <p>
+                To access your personalized rental options portal, we use
+                secure, passwordless authentication through Auth0. This involves
+                sending a verification code to your phone number or email
+                address. This ensures secure access while maintaining your
+                privacy.
+              </p>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                Privacy and Data Protection
+              </h2>
+              <p class="font-semibold text-primary">
+                We respect your privacy and are committed to protecting your
+                personal information.
+              </p>
+              <ul class="list-disc list-inside space-y-2 ml-4 mt-4">
+                <li>
+                  <strong>We do not share your information</strong> with third parties
+                </li>
+                <li>
+                  <strong>We do not sell your information</strong> under any circumstances
+                </li>
+                <li>
+                  Your data is stored securely and used only for the purposes
+                  described above
+                </li>
+                <li>
+                  We implement appropriate security measures to protect your
+                  information
+                </li>
+              </ul>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                Communications
+              </h2>
+              <p>
+                By submitting your preferences, you consent to receiving
+                communications from Bruschi Rentals regarding:
+              </p>
+              <ul class="list-disc list-inside space-y-2 ml-4">
+                <li>Rental options that match your preferences</li>
+                <li>Updates about available properties</li>
+                <li>Information about the rental process</li>
+                <li>Portal access instructions</li>
+              </ul>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                Your Consent
+              </h2>
+              <p>
+                By checking the terms acceptance box in our contact form and
+                submitting your information, you acknowledge that you have read
+                and understood these terms, and you agree to:
+              </p>
+              <ul class="list-disc list-inside space-y-2 ml-4">
+                <li>The collection and use of your information as described</li>
+                <li>
+                  Receiving relevant communications about rental opportunities
+                </li>
+                <li>The storage of your data in our secure systems</li>
+                <li>Our privacy practices regarding your information</li>
+              </ul>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                Contact Us
+              </h2>
+              <p>
+                If you have any questions about these terms or our services,
+                please contact us through our website or WhatsApp.
+              </p>
+
+              <div class="mt-8 p-6 bg-soft-light rounded-xl">
+                <p class="text-center text-lg font-semibold text-obsidian">
+                  Thank you for trusting Bruschi Rentals with your rental
+                  search. We're here to make finding your dream home in Miami
+                  simple and stress-free.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </PublicLayout>
+</Layout>

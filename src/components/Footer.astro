@@ -1,78 +1,185 @@
 ---
 import { Icon } from "astro-icon/components";
-import { Image } from "astro:assets";
 
 import Logo from "../assets/logo_dark.svg";
-
-const areas: string[] = [
-  "Wynwood",
-  "Dania Beach",
-  "Midtown",
-  "Fort Lauderdale",
-  "Edgewater",
-  "Hialeah",
-  "Downtown",
-  "Hialeah Gardens",
-  "Brickell",
-  "Doral",
-  "North Miami",
-  "Coral Gables",
-  "Aventura",
-  "Kendall",
-];
 ---
 
-<footer class="bg-obsidian text-soft py-12">
+<footer class="bg-obsidian text-soft py-16">
   <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-      <div class="px-2 space-y-4">
+    <!-- Trust Signals Bar -->
+    <div class="border-b border-soft/20 pb-8 mb-12">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
         <div>
-          <Logo class="w-full max-w-[200px] h-auto" />
-          <em class="text-white">Brokered by EXP Realty</em>
+          <div class="text-2xl font-bold text-primary mb-1">100+</div>
+          <div class="text-sm text-soft/80">Happy Digital Cliets</div>
         </div>
-        <p class="text-soft mb-6">
-          Your trusted partner in finding the perfect rental property in Miami.
-          We make the process simple, transparent, and enjoyable.
+        <div>
+          <div class="text-2xl font-bold text-primary mb-1">24hrs</div>
+          <div class="text-sm text-soft/80">Average Match Time</div>
+        </div>
+        <div>
+          <div class="text-2xl font-bold text-primary mb-1">98%</div>
+          <div class="text-sm text-soft/80">Client Satisfaction</div>
+        </div>
+        <div>
+          <div class="text-2xl font-bold text-primary mb-1">Miami</div>
+          <div class="text-sm text-soft/80">Local Expertise</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Footer Content -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+      <!-- Company Section -->
+      <div class="lg:col-span-1">
+        <div class="mb-6">
+          <Logo class="w-full max-w-[180px] h-auto mb-3" />
+          <div class="text-primary font-semibold text-sm mb-2">
+            Smart Miami Rental Matching
+          </div>
+          <em class="text-white/80 text-xs">Brokered by EXP Realty</em>
+        </div>
+        <p class="text-soft/90 text-sm leading-relaxed mb-4">
+          We combine AI-powered matching with local expertise to find your
+          perfect Miami rental in minutes, not months.
         </p>
+        <div class="flex items-center space-x-2 text-xs text-soft/70">
+          <Icon name="mdi:shield-check" class="size-4 text-primary" />
+          <span>Licensed & Insured</span>
+        </div>
       </div>
 
-      <div class="px-2">
-        <h3 class="text-lg font-bold mb-6">Areas We Serve</h3>
-        <ul class="grid grid-cols-2">
-          {areas.map((a) => <li>{a}</li>)}
+      <!-- Services & Navigation -->
+      <div>
+        <h3 class="text-lg font-bold mb-6 text-white">Services</h3>
+        <ul class="space-y-3">
+          <li>
+            <a
+              href="/more-info"
+              class="text-soft/80 hover:text-primary transition-colors text-sm flex items-center"
+            >
+              <Icon name="mdi:account-plus" class="size-4 mr-2" />
+              Find Your Match
+            </a>
+          </li>
+          <li>
+            <a
+              href="/portal"
+              class="text-soft/80 hover:text-primary transition-colors text-sm flex items-center"
+            >
+              <Icon name="mdi:view-dashboard" class="size-4 mr-2" />
+              Client Portal
+            </a>
+          </li>
+          <li>
+            <a
+              href="#how-it-works"
+              class="text-soft/80 hover:text-primary transition-colors text-sm flex items-center"
+            >
+              <Icon name="mdi:chart-timeline" class="size-4 mr-2" />
+              How It Works
+            </a>
+          </li>
         </ul>
       </div>
 
-      <div class="px-2">
-        <h3 class="text-lg font-bold mb-6">Social Media</h3>
-        <ul class="flex space-x-2">
+      <!-- Legal & Compliance -->
+      <div>
+        <h3 class="text-lg font-bold mb-6 text-white">Legal</h3>
+        <ul class="space-y-3">
           <li>
+            <a
+              href="/terms-of-service"
+              class="text-soft/80 hover:text-primary transition-colors text-sm flex items-center"
+            >
+              <Icon name="mdi:file-document" class="size-4 mr-2" />
+              Terms of Service
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Connect & Contact -->
+      <div>
+        <h3 class="text-lg font-bold mb-6 text-white">Connect With Us</h3>
+
+        <!-- Contact Methods -->
+        <div class="space-y-4 mb-6">
+          <a
+            href="https://wa.me/message/F5OFMA5RIRXYJ1"
+            target="_blank"
+            class="flex items-center text-soft/80 hover:text-primary transition-colors text-sm group"
+          >
+            <div
+              class="bg-green-600 p-2 rounded-lg mr-3 group-hover:bg-green-500 transition-colors"
+            >
+              <Icon name="mdi:whatsapp" class="size-4 text-white" />
+            </div>
+            <div>
+              <div class="font-medium">WhatsApp Chat</div>
+              <div class="text-xs text-soft/60">Instant support</div>
+            </div>
+          </a>
+
+          <a
+            href="mailto:hello@bruschi-rentals.com"
+            class="flex items-center text-soft/80 hover:text-primary transition-colors text-sm group"
+          >
+            <div
+              class="bg-primary/20 p-2 rounded-lg mr-3 group-hover:bg-primary/30 transition-colors"
+            >
+              <Icon name="mdi:email" class="size-4 text-primary" />
+            </div>
+            <div>
+              <div class="font-medium">Email Support</div>
+              <div class="text-xs text-soft/60">info@bruschirentals.com</div>
+            </div>
+          </a>
+        </div>
+
+        <!-- Social Media -->
+        <div>
+          <h4 class="text-sm font-semibold mb-3 text-soft/90">Follow Us</h4>
+          <div class="flex space-x-3">
             <a
               target="_blank"
               href="https://www.instagram.com/bruschirentals?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
-              class="text-soft hover:scale-120 hover:text-primary transition-colors"
+              class="text-soft/60 hover:text-primary hover:scale-110 transition-all p-2 rounded-lg hover:bg-soft/10"
+              aria-label="Follow us on Instagram"
             >
-              <Icon name="mdi:instagram" class="size-10" />
-              <span class="sr-only">Instagram</span>
+              <Icon name="mdi:instagram" class="size-5" />
             </a>
-          </li>
-          <li>
             <a
               target="_blank"
-              href="www.linkedin.com/bruschi-rentals"
-              class="text-soft hover:scale-120 hover:text-primary transition-colors"
+              href="https://www.facebook.com/paocedeo/"
+              class="text-soft/60 hover:text-primary hover:scale-110 transition-all p-2 rounded-lg hover:bg-soft/10"
+              aria-label="Like us on Facebook"
             >
-              <Icon name="mdi:linkedin" class="size-10" />
-              <span class="sr-only">LinkedIn</span>
+              <Icon name="mdi:facebook" class="size-5" />
             </a>
-          </li>
-        </ul>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="flex justify-center">
-      <p class="text-soft text-sm">
-        &copy; {new Date().getFullYear()} Bruschi Rentals. All rights reserved.
-      </p>
+
+    <!-- Footer Bottom -->
+    <div class="border-t border-soft/20 pt-8">
+      <div
+        class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0"
+      >
+        <div class="text-soft/70 text-sm">
+          &copy; {new Date().getFullYear()} Bruschi Rentals. All rights reserved.
+          | Made with ❤️ in Miami
+        </div>
+        <button
+          onclick="window.scrollTo({top: 0, behavior: 'smooth'})"
+          class="hover:text-primary transition-colors flex items-center"
+          aria-label="Back to top"
+        >
+          <Icon name="mdi:chevron-up" class="size-4 mr-1" />
+          Back to Top
+        </button>
+      </div>
     </div>
   </div>
 </footer>
