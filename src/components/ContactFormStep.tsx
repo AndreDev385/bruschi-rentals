@@ -159,6 +159,7 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
 							onChange={(e) => handleInputChange("name", e.target.value)}
 							className={errors.name ? "border-red-500" : ""}
 							placeholder="Your Full Name *"
+							required
 						/>
 					</Label>
 					{errors.name && (
@@ -174,7 +175,8 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
 							value={formValues.email}
 							onChange={(e) => handleInputChange("email", e.target.value)}
 							className={errors.email ? "border-red-500" : ""}
-							placeholder="Email Address (optional)"
+							placeholder="Email Address"
+							required
 						/>
 					</Label>
 					{errors.email && (
@@ -225,7 +227,7 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
 									className="size-24"
 								/>
 							</div>
-							<p className="text-mocha font-medium">On site tour</p>
+							<p className="text-mocha font-medium">In person tour</p>
 						</label>
 						<label
 							htmlFor="tourType-virtual"

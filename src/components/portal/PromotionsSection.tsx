@@ -57,7 +57,8 @@ const PromotionsSection: React.FC<PromotionsSectionProps> = ({
               <div>
                 <h3 className="font-semibold">Standard Pricing</h3>
                 <p className="text-sm text-muted-foreground">
-                  No special offers - original rates apply
+                  No special offers - Original rates apply - Min. 12 months
+                  contracts
                 </p>
               </div>
             </div>
@@ -84,15 +85,16 @@ const PromotionsSection: React.FC<PromotionsSectionProps> = ({
                 </div>
                 <div>
                   <h3 className="font-semibold">
-                    {promo.contract_max_months
-                      ? `${promo.contract_min_months}-${promo.contract_max_months} Month Special`
-                      : `${promo.contract_min_months} Month Special`}
+                    Get {promo.free_months_count} free months
                   </h3>
                   <p className="text-sm text-muted-foreground">
-                    {promo.free_month_numbers &&
-                    promo.free_month_numbers.length > 0
-                      ? `Get ${promo.free_months_count} free months (applied in months ${promo.free_month_numbers.join(", ")})`
-                      : `Get ${promo.free_months_count} free months`}
+                    Valid for{" "}
+                    {promo.contract_max_months
+                      ? `${promo.contract_min_months}-${promo.contract_max_months}`
+                      : `${promo.contract_min_months}`}{" "}
+                    months contracts.
+                    {promo.free_month_numbers.length > 0 &&
+                      `(applied in months ${promo.free_month_numbers.join(", ")})`}
                   </p>
                 </div>
               </div>
