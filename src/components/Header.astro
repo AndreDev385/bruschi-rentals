@@ -13,14 +13,14 @@ console.log(session, "session");
 
 <header class="absolute top-0 left-0 right-0 z-50">
   <div class="px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-16">
-      <a href={`/${search}`} class="flex items-center">
-        <Logo class="w-full max-w-24 lg:max-w-32 h-auto" />
+    <div class="flex items-center justify-between py-4">
+      <a href={`/${search}`} class="flex items-center" aria-label="Logo">
+        <Logo class="w-full max-w-32 lg:max-w-48 h-auto" />
       </a>
       <div class="flex items-center space-x-4">
-        <Button variant="link" className="text-white font-bold">
+        <Button variant="outline" className="bg-transparent text-white">
           <a href={session ? `/portal${search}` : `/login${search}`}
-            >{session ? "Portal" : "Login"}</a
+            >{session ? "Access" : "Login"}</a
           >
         </Button>
       </div>

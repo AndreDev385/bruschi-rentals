@@ -9,7 +9,9 @@ import PublicLayout from "@/layouts/PublicLayout.astro";
 import BenefitCard from "@/components/BenefitCard.astro";
 import TestimonialCard from "@/components/TestimonialCard.astro";
 
-import Hero from "@/assets/hero.jpg";
+import HeroImage from "@/assets/buildings1.png";
+import ValuePropositionImage from "@/assets/buildings2.png";
+import HowItWorksImage from "@/assets/buildings3.png";
 import Paulina from "@/assets/paulina.jpg";
 
 const url = new URL(Astro.request.url);
@@ -72,11 +74,11 @@ const testimonials = [
     <section class="relative w-full min-h-screen flex items-center">
       <div class="absolute inset-0 z-0">
         <div
-          class="absolute inset-0 bg-gradient-to-b from-black/70 via-obsidian/70 to-black/70"
+          class="absolute inset-0 bg-gradient-to-b from-black/80 via-obsidian/60 to-black/80"
         >
         </div>
         <Image
-          src={Hero}
+          src={HeroImage}
           alt="Hero"
           loading="eager"
           class="w-full h-full object-cover"
@@ -86,20 +88,18 @@ const testimonials = [
       <div
         class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-20 flex justify-center"
       >
-        <div class="max-w-4xl">
+        <div class="max-w-6xl">
           <h1
-            class="text-5xl md:text-5xl lg:text-7xl font-bold text-soft leading-tight mb-4 text-center"
+            class="text-5xl md:text-5xl lg:text-7xl font-bold text-soft leading-tight mb-4 text-center max-w-4xl"
           >
-            Get Matched with Your <strong class="text-primary"
-              >Perfect Miami Rental</strong
-            >
+            Find Your Perfect Miami <strong class="text-primary">Rental</strong>
             in Minutes
           </h1>
           <p
             class="text-xl md:text-2xl text-soft/90 mb-8 text-center max-w-3xl mx-auto"
           >
-            Tell us your preferences → Get matched options → Access your
-            personal portal
+            Tell us your preferences and our system will find the best options
+            for you.
           </p>
           <div class="text-center">
             <a
@@ -115,36 +115,33 @@ const testimonials = [
     </section>
 
     <!-- Value proposition -->
-    <section id="benefits" class="bg-soft-dark py-20 flex items-center">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section
+      id="benefits"
+      class="relative w-full py-20 flex items-center min-h-screen"
+    >
+      <div class="absolute inset-0 z-0">
+        <div
+          class="absolute inset-0 bg-gradient-to-b from-soft-dark/90 via-soft/70 to-soft-dark/90"
+        >
+        </div>
+        <Image
+          src={ValuePropositionImage}
+          alt="Value Proposition Background"
+          loading="eager"
+          class="w-full h-full object-cover"
+        />
+      </div>
+
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
         <div class="text-center mb-16 space-y-8">
-          <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-obsidian">
+          <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold">
             Tired of Endless Miami Rental Searches?
           </h2>
-          <p class="text-lg text-obsidian max-w-2xl mx-auto">
-            The Miami rental market is competitive and overwhelming. Traditional
-            searching means hours of scrolling through irrelevant listings. You
-            deserve a smarter, faster way to find your perfect rental.
+          <p class="text-lg text-mocha max-w-4xl mx-auto">
+            No more hours of scrolling through irrelevant listings. We use smart
+            matching and local expertise to get you into your dream rental
+            effortlessly.
           </p>
-          <div
-            class="bg-soft-light p-8 rounded-2xl shadow-m max-w-4xl mx-auto mb-16"
-          >
-            <h3 class="text-2xl font-bold text-primary mb-4">
-              Here's How Our Smart System Works
-            </h3>
-            <p class="text-xl text-obsidian font-semibold leading-relaxed">
-              We combine AI matching with human expertise for the ultimate
-              rental experience
-            </p>
-            <p class="text-lg text-mocha mt-4">
-              Share your preferences once, get perfectly matched options
-              delivered to your personal portal. No more generic listings or
-              wasted time.
-              <strong class="font-bold"
-                >This is rental search, reimagined.</strong
-              >
-            </p>
-          </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -163,7 +160,7 @@ const testimonials = [
           <BenefitCard
             icon="mdi:clock-fast"
             title="Lightning Fast Results"
-            description="From form completion to matched options in under 24 hours - no more endless searching"
+            description="From form completion to matched options in under 24 hours - no more wasted time"
           />
 
           <BenefitCard
@@ -188,142 +185,64 @@ const testimonials = [
     </section>
 
     <!-- How It Works -->
-    <section class="py-20 bg-soft-light">
-      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section
+      class="relative w-full py-20 min-h-screen flex justify-center items-center"
+    >
+      <div class="absolute inset-0 z-0">
+        <div
+          class="absolute inset-0 bg-gradient-to-b from-black/80 via-obsidian/60 to-black/80"
+        >
+        </div>
+        <Image
+          src={HowItWorksImage}
+          alt="How It Works Background"
+          loading="lazy"
+          class="w-full h-full object-cover"
+        />
+      </div>
+
+      <div class="h-full container mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
         <div class="text-center mb-16">
-          <h2
-            class="text-3xl md:text-4xl lg:text-5xl font-bold text-obsidian mb-4"
-          >
-            How It Works
+          <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-soft mb-4">
+            Here's How It Works
           </h2>
-          <p class="text-lg text-obsidian max-w-2xl mx-auto">
+          <p class="text-lg text-soft/90 max-w-2xl mx-auto">
             Our streamlined digital process gets you from preferences to perfect
             rental match in just a few simple steps.
           </p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          <div
-            class="bg-soft-light p-8 rounded-xl shadow-m hover:shadow-l transition-all hover:-translate-y-1"
-          >
-            <div
-              class="size-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-m hover:shadow-l"
-            >
-              <svg
-                class="size-8 text-primary"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                ></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold text-obsidian mb-4 text-center">
-              1. Share Your Preferences
-            </h3>
-            <p class="text-mocha leading-relaxed text-center">
-              Complete our smart 5-step form with your ideal neighborhood,
-              budget, and move-in date.
-            </p>
-          </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8">
+          <BenefitCard
+            icon="mdi:document"
+            title="1. Share Your Preferences"
+            description="Complete our smart 5-step form with your ideal neighborhood, budget, and move-in date."
+          />
 
-          <div
-            class="bg-soft-light p-8 rounded-xl shadow-m hover:shadow-l transition-all hover:-translate-y-1"
-          >
-            <div
-              class="size-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-m hover:shadow-l"
-            >
-              <svg
-                class="size-8 text-primary"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold text-obsidian mb-4 text-center">
-              2. Get Matched Options
-            </h3>
-            <p class="text-mocha leading-relaxed text-center">
-              Our AI matching system finds your perfect rentals from our
-              exclusive network.
-            </p>
-          </div>
+          <BenefitCard
+            icon="mdi:lightning-bolt"
+            title="2. Get Matched Options"
+            description="Our AI matching system finds your perfect rentals from our exclusive network."
+          />
 
-          <div
-            class="bg-soft-light p-8 rounded-xl shadow-m hover:shadow-l transition-all hover:-translate-y-1"
-          >
-            <div
-              class="size-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-m hover:shadow-l"
-            >
-              <svg
-                class="size-8 text-primary"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                ></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold text-obsidian mb-4 text-center">
-              3. Explore in Your Portal
-            </h3>
-            <p class="text-mocha leading-relaxed text-center">
-              Access your secure dashboard to view options, save favorites, and
-              track progress.
-            </p>
-          </div>
+          <BenefitCard
+            icon="mdi:door"
+            title="3. Explore in Your Portal"
+            description="Access your secure dashboard to view options, save favorites, and track progress"
+          />
 
-          <div
-            class="bg-soft-light p-8 rounded-xl shadow-m hover:shadow-l transition-all hover:-translate-y-1"
-          >
-            <div
-              class="size-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-6 shadow-m hover:shadow-l"
-            >
-              <svg
-                class="size-8 text-primary"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"
-                ></path>
-              </svg>
-            </div>
-            <h3 class="text-xl font-bold text-obsidian mb-4 text-center">
-              4. Choose & Move Forward
-            </h3>
-            <p class="text-mocha leading-relaxed text-center">
-              Select your favorite and let us handle the rest - from tours to
-              move-in day.
-            </p>
-          </div>
+          <BenefitCard
+            icon="mdi:key"
+            title="4. Choose & Move Forward"
+            description="Select your favorite and let us handle the rest - from tours to move-in day."
+          />
         </div>
       </div>
     </section>
 
-    <section class="bg-soft-light py-20">
+    <section class="bg-soft-light py-20 min-h-screen">
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-        <article class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <article class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div class="space-y-8">
             <div class="mb-8">
               <span
@@ -334,34 +253,34 @@ const testimonials = [
                 Meet Paulina Cedeño
               </h2>
             </div>
-            <p class="text-xl">
+            <p class="text-lg">
               I've experienced the frustration of traditional Miami rental
               hunting firsthand. Hours wasted scrolling through irrelevant
               listings, endless phone calls, and the stress of making decisions
               from afar. <strong>That’s why I built something better.</strong>
             </p>
-            <p class="text-xl">
+            <p class="text-lg">
               <strong class="text-primary"
                 >For busy professionals like you</strong
               >, who need efficiency without sacrificing quality. I combined my
               local expertise with cutting-edge technology to create a rental
               search experience that's both smart and deeply personal.
             </p>
-            <p class="text-xl">
+            <p class="text-lg">
               We don't just find rentals. <strong
                 >We match dreams with reality</strong
               >, using AI to narrow thousands of options down to your perfect
               few, all while maintaining the human touch that makes moving feel
               right.
             </p>
-            <p class="text-xl">
+            <p class="text-lg">
               <strong class="text-primary">For people like you</strong>, who
               value time, want clear answers, and need someone who truly gets
               involved. Here, we don’t send random links. We walk with you,
               filter real options, and guide you step by step, as if I were
               doing it for myself.
             </p>
-            <p class="text-xl">
+            <p class="text-lg">
               Many offer “personalized service.” <strong
                 >We actually live it</strong
               >, from the first message to the moment you get your keys.
@@ -376,9 +295,9 @@ const testimonials = [
               <em>With love Paulina Cedeño</em>
             </div>
           </div>
-          <div class="flex justify-end">
+          <div class="flex justify-center lg:justify-end">
             <Picture
-              class="w-full max-w-[460px] h-auto rounded-xl shadow-2xl shadow-mauve"
+              class="w-full max-w-[480px] h-auto rounded-xl shadow-2xl shadow-mauve"
               src={Paulina}
               formats={["avif", "webp"]}
               alt="Paulina, Bruschi Rentals Founder"
@@ -421,7 +340,7 @@ const testimonials = [
           </div>
         </div>
 
-        <div class="columns-1 md:columns-2 xl:columns-3 gap-4 space-y-4">
+        <div class="columns-1 lg:columns-2 xl:columns-3 gap-4 space-y-4">
           {testimonials.map((t) => <TestimonialCard {...t} />)}
         </div>
 

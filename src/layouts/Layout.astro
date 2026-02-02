@@ -26,6 +26,12 @@ import "animate.css";
     />
     <meta name="generator" content={Astro.generator} />
     <title>Bruschi Rentals</title>
+    
+    <!-- Font Preloading for Performance -->
+    <link rel="preload" href="/fonts/quinn-bold.otf" as="font" type="font/otf" crossorigin />
+    <link rel="preload" href="/fonts/bell-bold.ttf" as="font" type="font/ttf" crossorigin />
+    <link rel="preload" href="/fonts/oxygen.ttf" as="font" type="font/ttf" crossorigin />
+    
     <ClientRouter />
   </head>
   <body>
