@@ -2,7 +2,6 @@
 export const prerender = false;
 
 import { Image, Picture } from "astro:assets";
-
 import Layout from "@/layouts/Layout.astro";
 import PublicLayout from "@/layouts/PublicLayout.astro";
 
@@ -92,22 +91,21 @@ const testimonials = [
           <h1
             class="text-5xl md:text-5xl lg:text-7xl font-bold text-soft leading-tight mb-4 text-center max-w-4xl"
           >
-            Find Your Perfect Miami <strong class="text-primary">Rental</strong>
+            Find Your Perfect Miami <strong class="text-primary">Home</strong>
             in Minutes
           </h1>
           <p
             class="text-xl md:text-2xl text-soft/90 mb-8 text-center max-w-3xl mx-auto"
           >
-            Tell us your preferences and our system will find the best options
-            for you.
+            Tell us your vision and budget, we’ll handle the rest.
           </p>
           <div class="text-center">
             <a
               href={`/more-info${search}`}
-              class="inline-block px-8 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105"
+              class="inline-block px-8 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105 uppercase"
               data-astro-prefetch="load"
             >
-              Start Your Smart Search
+              FIND ME A PLACE
             </a>
           </div>
         </div>
@@ -138,9 +136,8 @@ const testimonials = [
             Tired of Endless Miami Rental Searches?
           </h2>
           <p class="text-lg text-mocha max-w-4xl mx-auto">
-            No more hours of scrolling through irrelevant listings. We use smart
-            matching and local expertise to get you into your dream rental
-            effortlessly.
+            Stop wasting hours scrolling. Tell us what you want and we’ll match
+            you with the right place.
           </p>
         </div>
 
@@ -148,37 +145,37 @@ const testimonials = [
           <BenefitCard
             icon="mdi:brain"
             title="Smart Matching"
-            description="AI-powered preference matching finds your ideal rental from thousands of options"
+            description="We don’t show you random listings. Our system matches you with apartments that actually fit your style, budget, and needs. Saving you time and frustration."
           />
 
           <BenefitCard
             icon="mdi:view-dashboard"
-            title="Personal Portal"
-            description="Access all your matched options, save favorites, and track your rental journey in one secure dashboard"
+            title="Your Personal Apartment Portal"
+            description="Get your own private portal where you can view options, save favorites, leave notes, and track everything in one place."
           />
 
           <BenefitCard
             icon="mdi:clock-fast"
-            title="Lightning Fast Results"
-            description="From form completion to matched options in under 24 hours - no more wasted time"
+            title="Fast, Real Results"
+            description="No waiting weeks. No endless back and forth. Get quality options sent to you quickly so you can move forward with confidence."
           />
 
           <BenefitCard
             icon="mdi:shield-lock"
-            title="Secure & Private"
-            description="Passwordless authentication ensures your data stays yours. We never share or sell information"
+            title="Secure & Private Process"
+            description="Your information is protected and never shared. We respect your privacy and treat your search with care."
           />
 
           <BenefitCard
             icon="mdi:account-star"
-            title="Expert Human Guidance"
-            description="Human expertise and local knowledge behind every digital match and recommendation"
+            title="Real Human Experts by Your Side"
+            description="You’re not doing this alone. See us as your Miami rental bestie ready to guide you, answer your questions, and advocate for you every step of the way. "
           />
 
           <BenefitCard
             icon="mdi:video"
-            title="Flexible Viewing Options"
-            description="Choose virtual tours from anywhere or schedule in-person visits when you're ready"
+            title="Tour Your Way"
+            description="In-person tours, virtual tours, or a mix of both. You choose what works best for your schedule."
           />
         </div>
       </div>
@@ -206,29 +203,25 @@ const testimonials = [
           <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-soft mb-4">
             Here's How It Works
           </h2>
-          <p class="text-lg text-soft/90 max-w-2xl mx-auto">
-            Our streamlined digital process gets you from preferences to perfect
-            rental match in just a few simple steps.
-          </p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-8">
           <BenefitCard
             icon="mdi:document"
-            title="1. Share Your Preferences"
-            description="Complete our smart 5-step form with your ideal neighborhood, budget, and move-in date."
+            title="1. Share your preferences"
+            description="Complete our quick form with your ideal area, budget, and move-in date."
           />
 
           <BenefitCard
             icon="mdi:lightning-bolt"
             title="2. Get Matched Options"
-            description="Our AI matching system finds your perfect rentals from our exclusive network."
+            description="Our smart matching system finds your perfect rentals from our exclusive network."
           />
 
           <BenefitCard
             icon="mdi:door"
             title="3. Explore in Your Portal"
-            description="Access your secure dashboard to view options, save favorites, and track progress"
+            description="Access your secure dashboard to view options, save favorites, and track progress."
           />
 
           <BenefitCard
@@ -247,7 +240,7 @@ const testimonials = [
             <div class="mb-8">
               <span
                 class="text-primary font-semibold text-sm uppercase tracking-wider"
-                >Our Founder</span
+                >The brain behind</span
               >
               <h2 class="text-4xl lg:text-5xl font-bold text-obsidian mb-6">
                 Meet Paulina Cedeño
@@ -261,29 +254,31 @@ const testimonials = [
             </p>
             <p class="text-lg">
               <strong class="text-primary"
-                >For busy professionals like you</strong
-              >, who need efficiency without sacrificing quality. I combined my
-              local expertise with cutting-edge technology to create a rental
-              search experience that's both smart and deeply personal.
+                >I created a smarter, more personal way to find a rental.</strong
+              >Designed for busy professionals who want efficiency without
+              sacrificing quality.
             </p>
             <p class="text-lg">
-              We don't just find rentals. <strong
-                >We match dreams with reality</strong
-              >, using AI to narrow thousands of options down to your perfect
-              few, all while maintaining the human touch that makes moving feel
-              right.
+              By combining local market expertise, smart matching systems, and
+              real human guidance, I built a process that feels simple,
+              intentional, and supportive.
             </p>
+
             <p class="text-lg">
-              <strong class="text-primary">For people like you</strong>, who
-              value time, want clear answers, and need someone who truly gets
-              involved. Here, we don’t send random links. We walk with you,
-              filter real options, and guide you step by step, as if I were
-              doing it for myself.
+              For people like you, who value time, want clear answers, and need
+              someone who truly gets involved. Here, we don’t send random links.
+              We walk with you, filter real options, and guide you step by step.
+              The same way I would want someone to do it for me.
             </p>
+
             <p class="text-lg">
               Many offer “personalized service.” <strong
                 >We actually live it</strong
               >, from the first message to the moment you get your keys.
+            </p>
+
+            <p class="text-lg font-bold">
+              It’s Not Just a Search. It’s the Start of Your Next Chapter
             </p>
 
             <div
@@ -312,32 +307,12 @@ const testimonials = [
       <div class="container mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Loved by Remote Workers & Families
+            Stories from People Who Found Home
           </h2>
-          <p class="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
-            Don't just take our word for it. Hear from clients who found their
-            Miami dream homes through our smart digital platform.
+          <p class="text-lg text-gray-600 mx-auto mb-8">
+            Don’t just take our word for it. Hear from people who trusted us to
+            help them find home .
           </p>
-
-          {/* Trust Signals */}
-          <div class="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
-            <div class="text-center">
-              <div class="text-3xl font-bold text-primary mb-2">100+</div>
-              <div class="text-sm text-gray-600">Happy Digital Clients</div>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl font-bold text-primary mb-2">24hrs</div>
-              <div class="text-sm text-gray-600">Average Match Time</div>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl font-bold text-primary mb-2">98%</div>
-              <div class="text-sm text-gray-600">Client Satisfaction</div>
-            </div>
-            <div class="text-center">
-              <div class="text-3xl font-bold text-primary mb-2">Miami</div>
-              <div class="text-sm text-gray-600">Local Expertise</div>
-            </div>
-          </div>
         </div>
 
         <div class="columns-1 lg:columns-2 xl:columns-3 gap-4 space-y-4">
@@ -347,10 +322,10 @@ const testimonials = [
         <div class="mt-12 text-center">
           <a
             href={`/more-info${search}`}
-            class="inline-block px-8 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105 mr-4"
+            class="inline-block px-8 py-4 bg-primary hover:bg-primary/90 text-white font-bold rounded-lg transition-all duration-300 transform hover:scale-105 mr-4 uppercase"
             data-astro-prefetch="load"
           >
-            Start Your Smart Search
+            FIND ME A PLACE
           </a>
           <a
             href="https://wa.me/message/F5OFMA5RIRXYJ1"

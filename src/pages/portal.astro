@@ -1,6 +1,8 @@
 ---
 export const prerender = false;
 
+import { Image } from "astro:assets";
+import LogoSVG from "@/assets/isotype.svg";
 import Layout from "@/layouts/Layout.astro";
 import OptionCard from "@/components/portal/OptionCard";
 import { PhoneNumberPrompt } from "@/components/PhoneNumberPrompt";
@@ -134,12 +136,18 @@ try {
           href={`/${search}`}
           class="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
         >
-          <img src="logos/isotype.svg" alt="Bruschi Rentals" class="h-6 w-6" />
+          <Image
+            src={LogoSVG}
+            alt="Bruschi Rentals Logo"
+            loading="eager"
+            class="h-6 w-6"
+          />
           <span>Back to Home</span>
         </a>
         <a
           href={`/logout${search}`}
           class="flex items-center space-x-2 text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="logout"
         >
           <LogOut />
         </a>
@@ -149,11 +157,11 @@ try {
   <section class="w-full py-12 bg-background min-h-screen">
     <div class="max-w-4xl mx-auto px-6">
       <div class="max-w-6xl mx-auto">
-        <div class="mb-12 text-center">
+        <div class="mb-4 text-center">
           <h1 class="text-4xl font-bold text-foreground mb-4">
             My Rental Options
           </h1>
-          <p class="text-muted-foreground text-lg mb-4">
+          <p class="text-muted-foreground text-lg">
             {
               options.length > 0
                 ? "Curated rental options tailored to your preferences by your realtor."

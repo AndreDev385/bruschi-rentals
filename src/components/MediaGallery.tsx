@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination, Navigation } from "swiper/modules";
+import { Autoplay, Pagination } from "swiper/modules";
 import type { SwiperRef } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
@@ -42,13 +42,7 @@ const MediaGallery: React.FC<MediaGalleryProps> = ({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
-  if (media.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-96 bg-muted rounded-lg">
-        <span className="text-muted-foreground">No media available</span>
-      </div>
-    );
-  }
+  if (media.length === 0) return null;
 
   return (
     <>

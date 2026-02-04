@@ -48,10 +48,11 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
         <form onSubmit={handleSubmit}>
           <textarea
             value={feedback}
+            name="feedback"
             onChange={(e) => setFeedback(e.target.value)}
             rows={4}
             disabled={loading}
-            className="w-full px-3 py-2 border border-border rounded-lg focus:ring-2 focus:ring-ring focus:border-transparent resize-none disabled:opacity-50"
+            className="w-full px-3 py-2 border border-border rounded-lg focus:border-transparent resize-none disabled:opacity-50"
             placeholder="Share your thoughts about this option..."
           />
           <Button type="submit" disabled={loading} className="mt-3">
