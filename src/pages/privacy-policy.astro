@@ -1,0 +1,428 @@
+---
+export const prerender = false;
+
+import { Image } from "astro:assets";
+import Layout from "@/layouts/Layout.astro";
+import PublicLayout from "@/layouts/PublicLayout.astro";
+import Hero from "@/assets/hero.jpg";
+---
+
+<Layout>
+  <PublicLayout>
+    <section class="relative w-full min-h-screen flex items-center py-20">
+      <div class="absolute inset-0 z-0">
+        <div
+          class="absolute inset-0 bg-gradient-to-b from-black/70 via-obsidian/70 to-black/70"
+        >
+        </div>
+        <Image
+          src={Hero}
+          alt="Hero"
+          loading="eager"
+          class="w-full h-full object-cover"
+        />
+      </div>
+
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8 relative z-20">
+        <div class="max-w-4xl mx-auto">
+          <div
+            class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-m p-8 md:p-12"
+          >
+            <h1
+              class="text-3xl md:text-4xl font-bold text-obsidian mb-8 text-center"
+            >
+              Privacy Policy
+            </h1>
+
+            <div class="prose prose-lg max-w-none text-obsidian">
+              <p class="text-xl font-semibold text-primary mb-6">
+                At Bruschi Rentals, we respect your privacy and are committed to
+                protecting your personal information. Last updated: January
+                2026.
+              </p>
+
+              <p class="mb-6">
+                Please also review our <a
+                  href="/terms-of-service"
+                  class="text-primary hover:text-primary/80 underline"
+                  >Terms of Service</a
+                > for information about how we operate our rental assistance services.
+              </p>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                1. Introduction
+              </h2>
+              <p>
+                This Privacy Policy explains how Bruschi Rentals ("we," "us," or
+                "our") collects, uses, protects, and shares your personal
+                information when you use our rental assistance services. By
+                using our services, you agree to the practices described in this
+                policy.
+              </p>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                2. Information We Collect
+              </h2>
+              <p>When you submit our form or use our services, we collect:</p>
+              <ul class="list-disc list-inside space-y-2 ml-4">
+                <li>
+                  <strong>Contact Information:</strong> Name, phone number, and email
+                  address
+                </li>
+                <li>
+                  <strong>Rental Preferences:</strong> Neighborhood preferences,
+                  apartment type, budget range, move-in date, and tour type preferences
+                </li>
+                <li>
+                  <strong>Additional Information:</strong> Any notes or special requirements
+                  you provide
+                </li>
+                <li>
+                  <strong>Authentication Data:</strong> Information used to verify
+                  your identity when accessing your portal
+                </li>
+              </ul>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                3. How We Use Your Information
+              </h2>
+              <p>Your information is used exclusively for:</p>
+              <ul class="list-disc list-inside space-y-2 ml-4">
+                <li>
+                  <strong>Personalized Service:</strong> Sending you relevant rental
+                  options and information based on your preferences
+                </li>
+                <li>
+                  <strong>Secure Access:</strong> Providing authentication codes
+                  for secure portal access
+                </li>
+                <li>
+                  <strong>Communication:</strong> Facilitating communication regarding
+                  rental opportunities and updates
+                </li>
+                <li>
+                  <strong>Business Operations:</strong> Internal organization and
+                  operational purposes
+                </li>
+                <li>
+                  <strong>Service Improvement:</strong> Improving our rental assistance
+                  services
+                </li>
+              </ul>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                4. SMS/Text Message Privacy (A2P 10DLC)
+              </h2>
+              <p>
+                When you provide your phone number and consent to receive SMS
+                messages, we collect and use this information to deliver:
+              </p>
+              <ul class="list-disc list-inside space-y-2 ml-4">
+                <li>
+                  <strong>Authentication Messages:</strong> One-time passcodes (OTP)
+                  for secure portal access
+                </li>
+                <li>
+                  <strong>Service Updates:</strong> Rental property recommendations
+                  matching your preferences
+                </li>
+                <li>
+                  <strong>Transactional Messages:</strong> Updates about your rental
+                  application status and appointments
+                </li>
+                <li>
+                  <strong>Customer Support:</strong> Responses to your inquiries
+                </li>
+              </ul>
+
+              <h3 class="text-xl font-bold text-obsidian mt-6 mb-3">
+                4.1 Mobile Information Protection
+              </h3>
+              <p class="font-semibold text-primary mb-4">
+                Your mobile privacy is our priority. Here's our commitment:
+              </p>
+
+              <div class="bg-soft-light p-6 rounded-xl mb-4">
+                <p class="font-bold text-obsidian mb-3">We will NEVER:</p>
+                <ul class="list-disc list-inside space-y-2 ml-4">
+                  <li>
+                    Share your mobile phone number with third parties for
+                    marketing or promotional purposes
+                  </li>
+                  <li>
+                    Sell your mobile information to lead generators, data
+                    brokers, or any other entities
+                  </li>
+                  <li>
+                    Use your phone number for promotional purposes beyond our
+                    rental services
+                  </li>
+                  <li>
+                    Share your SMS opt-in consent with third-party marketing
+                    platforms
+                  </li>
+                </ul>
+              </div>
+
+              <div class="bg-soft-light p-6 rounded-xl mb-4">
+                <p class="font-bold text-obsidian mb-3">
+                  We ONLY share your information with:
+                </p>
+                <ul class="list-disc list-inside space-y-2 ml-4">
+                  <li>
+                    <strong>Service providers who support our operations</strong
+                    >
+                    - These companies help us deliver our services but are strictly
+                    prohibited from using your information for their own purposes:
+                    <ul class="list-circle list-inside space-y-1 ml-6 mt-2">
+                      <li>
+                        <strong>Twilio:</strong> For SMS delivery and WhatsApp messaging
+                      </li>
+                      <li>
+                        <strong>Auth0:</strong> For secure authentication services
+                      </li>
+                    </ul>
+                  </li>
+                </ul>
+                <p class="mt-4 text-sm">
+                  All third-party providers are contractually obligated to
+                  protect your data and may not use it for their own marketing
+                  or share it with other parties.
+                </p>
+              </div>
+
+              <h3 class="text-xl font-bold text-obsidian mt-6 mb-3">
+                4.2 SMS Opt-Out
+              </h3>
+              <p>
+                You can opt out of receiving non-essential SMS messages at any
+                time by:
+              </p>
+              <ul class="list-disc list-inside space-y-2 ml-4">
+                <li>
+                  Replying <strong>STOP</strong> to any SMS message from us
+                </li>
+                <li>Contacting us via email at info@bruschirentals.com</li>
+                <li>
+                  Using the preference settings in your client portal (when
+                  available)
+                </li>
+              </ul>
+              <p class="mt-4">
+                <strong>Note:</strong> Opting out of SMS messages may prevent you
+                from receiving authentication codes required to access your rental
+                portal.
+              </p>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                5. Third-Party Service Providers
+              </h2>
+              <p>
+                We use the following third-party services to operate our
+                platform. These providers have access to certain personal
+                information only as needed to perform their functions and are
+                contractually obligated to protect your data:
+              </p>
+              <ul class="list-disc list-inside space-y-3 ml-4 mt-4">
+                <li>
+                  <strong>Twilio:</strong> Handles SMS message delivery and WhatsApp
+                  messaging. Your phone number is shared with Twilio solely for the
+                  purpose of delivering messages you request. Twilio may not use
+                  your information for any other purpose.
+                </li>
+                <li>
+                  <strong>Auth0:</strong> Provides secure authentication services.
+                  Your contact information is used to verify your identity and provide
+                  secure access to your portal.
+                </li>
+              </ul>
+              <p class="mt-4 font-semibold">
+                These service providers are strictly limited to using your
+                information only to support the services we provide to you. They
+                may not sell, share, or use your information for their own
+                business purposes or marketing.
+              </p>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                6. Data Protection and Security
+              </h2>
+              <p class="font-semibold text-primary mb-4">
+                We respect your privacy and are committed to protecting your
+                personal information.
+              </p>
+              <ul class="list-disc list-inside space-y-2 ml-4">
+                <li>
+                  <strong>No Third-Party Sharing:</strong> We do not share your information
+                  with third parties for marketing purposes
+                </li>
+                <li>
+                  <strong>No Selling of Data:</strong> We do not sell your information
+                  under any circumstances
+                </li>
+                <li>
+                  <strong>Secure Storage:</strong> Your data is stored securely using
+                  industry-standard encryption
+                </li>
+                <li>
+                  <strong>Limited Access:</strong> Only authorized personnel have
+                  access to your personal information
+                </li>
+                <li>
+                  <strong>Encryption:</strong> We use industry-standard encryption
+                  for data transmission and storage
+                </li>
+                <li>
+                  <strong>Security Measures:</strong> We implement appropriate technical
+                  and organizational security measures to protect your information
+                </li>
+              </ul>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                7. Data Retention
+              </h2>
+              <p>
+                We retain your personal information for as long as necessary to
+                provide our services or as required by law. Specifically:
+              </p>
+              <ul class="list-disc list-inside space-y-2 ml-4 mt-4">
+                <li>
+                  <strong>Active Searches:</strong> While you are actively searching
+                  for rentals and accessing our services
+                </li>
+                <li>
+                  <strong>After Service Completion:</strong> For a reasonable period
+                  after service completion for record-keeping and legal compliance
+                </li>
+                <li>
+                  <strong>Opt-Out Records:</strong> We maintain records of opt-out
+                  requests to honor your preferences
+                </li>
+              </ul>
+              <p class="mt-4">
+                You may request deletion of your data at any time by contacting
+                us at info@bruschirentals.com. We will promptly process your
+                request in accordance with applicable laws.
+              </p>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                8. Your Privacy Rights
+              </h2>
+              <p>You have the right to:</p>
+              <ul class="list-disc list-inside space-y-2 ml-4">
+                <li>
+                  <strong>Access:</strong> Request access to the personal information
+                  we hold about you
+                </li>
+                <li>
+                  <strong>Correction:</strong> Request correction of inaccurate information
+                </li>
+                <li>
+                  <strong>Deletion:</strong> Request deletion of your personal data
+                </li>
+                <li>
+                  <strong>Opt-Out:</strong> Opt out of non-essential communications
+                </li>
+                <li>
+                  <strong>Withdraw Consent:</strong> Withdraw consent where applicable
+                </li>
+                <li>
+                  <strong>Data Portability:</strong> Request a copy of your data
+                  in a portable format
+                </li>
+              </ul>
+              <p class="mt-4">
+                To exercise these rights, contact us at info@bruschirentals.com.
+                We will respond to your request within a reasonable timeframe.
+              </p>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                9. Your Consent
+              </h2>
+              <p>
+                By checking the consent box in our contact form and submitting
+                your information, you acknowledge that you have read and
+                understood this Privacy Policy, and you consent to:
+              </p>
+              <ul class="list-disc list-inside space-y-2 ml-4">
+                <li>The collection and use of your information as described</li>
+                <li>
+                  Receiving SMS messages including authentication codes and
+                  rental updates
+                </li>
+                <li>The storage of your data in our secure systems</li>
+                <li>Our privacy practices regarding your information</li>
+                <li>
+                  Sharing your information with our service providers (Twilio,
+                  Auth0) as described above
+                </li>
+                <li>
+                  Understanding that message and data rates may apply based on
+                  your mobile carrier plan
+                </li>
+              </ul>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                10. Children's Privacy
+              </h2>
+              <p>
+                Our services are not intended for individuals under the age of
+                18. We do not knowingly collect personal information from
+                children. If you believe we have inadvertently collected
+                information from a child, please contact us immediately at
+                info@bruschirentals.com.
+              </p>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                11. Changes to This Privacy Policy
+              </h2>
+              <p>
+                We may update this Privacy Policy from time to time to reflect
+                changes in our practices or legal requirements. We will notify
+                you of any material changes by:
+              </p>
+              <ul class="list-disc list-inside space-y-2 ml-4">
+                <li>Posting the new Privacy Policy on this page</li>
+                <li>Updating the "Last updated" date</li>
+                <li>
+                  Sending you a notification if required by applicable laws
+                </li>
+              </ul>
+              <p class="mt-4">
+                Your continued use of our services after any changes constitutes
+                acceptance of the updated Privacy Policy.
+              </p>
+
+              <h2 class="text-2xl font-bold text-obsidian mt-8 mb-4">
+                12. Contact Us
+              </h2>
+              <p>
+                If you have any questions about this Privacy Policy, our privacy
+                practices, or how we handle your personal information, please
+                contact us:
+              </p>
+              <ul class="list-disc list-inside space-y-2 ml-4">
+                <li>
+                  <strong>Email:</strong> info@bruschirentals.com
+                </li>
+                <li>
+                  <strong>WhatsApp:</strong> Available through our website
+                </li>
+              </ul>
+              <p class="mt-6">
+                We will respond to your inquiry as promptly as possible.
+              </p>
+
+              <div class="mt-8 p-6 bg-soft-light rounded-xl">
+                <p class="text-center text-lg font-semibold text-obsidian">
+                  Your privacy and trust are important to us. We are committed
+                  to protecting your personal information and using it only to
+                  help you find your dream home in Miami.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </PublicLayout>
+</Layout>
