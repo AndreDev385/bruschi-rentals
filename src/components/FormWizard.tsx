@@ -60,7 +60,10 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
     const saved = localStorage.getItem("formData");
     if (saved) {
       try {
-        setFormData(JSON.parse(saved));
+        const parsedData = JSON.parse(saved);
+        // Never restore termsAccepted - user must explicitly consent each time
+        const { termsAccepted, ...restData } = parsedData;
+        setFormData(restData);
       } catch (error) {
         console.warn("Failed to restore form data:", error);
       }
@@ -68,7 +71,9 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("formData", JSON.stringify(formData));
+    // Don't persist termsAccepted - user must explicitly consent each time
+    const { termsAccepted, ...dataToSave } = formData;
+    localStorage.setItem("formData", JSON.stringify(dataToSave));
   }, [formData]);
 
   // Clear on success
