@@ -1,5 +1,5 @@
 import { actions } from "astro:actions";
-import { Loader2, Mail, Smartphone } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -8,11 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type LoginMethod = "phone" | "email";
+//type LoginMethod = "phone" | "email";
 type LoginStep = "input" | "code";
 
 export const LoginForm: React.FC = () => {
-  const [currentStep, setCurrentStep] = useState<LoginStep>("phone");
+  const [currentStep, setCurrentStep] = useState<LoginStep>("input");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [code, setCode] = useState("");
   const [isSendingCode, setIsSendingCode] = useState(false);
@@ -100,7 +100,7 @@ export const LoginForm: React.FC = () => {
   };
 
   const handleBackToPhone = () => {
-    setCurrentStep("phone");
+    setCurrentStep("input");
     setCode("");
   };
 
@@ -113,11 +113,17 @@ export const LoginForm: React.FC = () => {
   return (
     <div className="max-w-md bg-soft rounded-xl shadow-lg p-8">
       <div className="text-center mb-4">
-        <h1 className="text-3xl font-bold text-obsidian mb-4">Welcome Back</h1>
-        <p className="text-mocha">Access your personalized rental options</p>
+        <h1 className="text-3xl font-bold text-obsidian mb-2">Log In</h1>
+        <p className="text-mocha">Access your personalized rental portal</p>
+        <div className="text-xs text-gray-500 bg-soft-dark/30 p-3 rounded-lg">
+          <p >
+            <strong>Secure Access:</strong> We send a one-time verification code to your phone
+            to confirm your identity and keep your account secure.
+          </p>
+        </div>
       </div>
 
-      {currentStep === "phone" && (
+      {currentStep === "input" && (
         <div className="space-y-4">
           <div>
             <Label htmlFor="phoneNumber">Phone Number</Label>
@@ -140,6 +146,15 @@ export const LoginForm: React.FC = () => {
             {isSendingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isSendingCode ? "Sending..." : "Send Code"}
           </Button>
+          <div className="flex justify-center items-center">
+            <Button
+              className="text-primary hover:underline"
+              variant="link"
+              onClick={() => setCurrentStep("code")}
+            >
+              Already have a code?
+            </Button>
+          </div>
         </div>
       )}
 
@@ -147,7 +162,7 @@ export const LoginForm: React.FC = () => {
         <div className="space-y-6">
           <div className="text-center mb-4">
             <p className="text-sm text-mocha">
-              We've sent a 6-digit code to <strong>{phoneNumber}</strong>. Enter
+              We've sent a <strong>6-digit code</strong>. Enter
               it below to continue.
             </p>
           </div>
@@ -195,7 +210,7 @@ export const LoginForm: React.FC = () => {
         </div>
       )}
 
-      <div className="mt-6 text-center">
+      <div className="mt-2 text-center">
         <p className="text-sm text-mocha">
           New here?{" "}
           <a
