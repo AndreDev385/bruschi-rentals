@@ -5,12 +5,18 @@ import { Image } from "astro:assets";
 import LogoSVG from "@/assets/isotype.svg";
 import Layout from "@/layouts/Layout.astro";
 import OptionCard from "@/components/portal/OptionCard";
+import CondoOptionCard from "@/components/portal/CondoOptionCard";
 import { PhoneNumberPrompt } from "@/components/PhoneNumberPrompt";
 import { getSession, setSession } from "@/lib/auth";
 import { listClientOptions } from "@/services/options.server";
+import { listClientCondoOptions } from "@/services/condos.server";
 import { fetchClientPreferences } from "@/services/preferences.server";
 import { handleAuthError } from "@/lib/auth-utils";
-import type { ClientOptionRead, ClientPreferencesRead } from "@/types";
+import type {
+  ClientOptionRead,
+  CondoOptionRead,
+  ClientPreferencesRead,
+} from "@/types";
 import { getSecret } from "astro:env/server";
 import {
   Home,
@@ -41,8 +47,10 @@ if (!hasSeenWelcome) {
   return Astro.redirect("/welcome");
 }
 
-// Check if client needs to add phone number (migration support)
+// Get client data (needed for both phone check and condo options)
 let needsPhoneNumber = false;
+let clientId: string | null = null;
+
 try {
   const response = await fetch(`${API_URL}/api/v1/clients/me`, {
     headers: { Authorization: `Bearer ${session.accessToken}` },
@@ -51,9 +59,10 @@ try {
   if (response.ok) {
     const client = await response.json();
     needsPhoneNumber = !client.phone_number;
+    clientId = client.id;
   }
 } catch (error) {
-  console.error("Failed to check client phone number:", error);
+  console.error("Failed to fetch client data:", error);
   // Don't block user if check fails, continue to portal
   needsPhoneNumber = false;
 }
@@ -88,6 +97,39 @@ try {
     return Astro.redirect("/login");
   } else {
     options = [];
+  }
+}
+
+let condoOptions: CondoOptionRead[] = [];
+
+try {
+  condoOptions = await listClientCondoOptions(session.accessToken);
+} catch (error) {
+  const authResult = await handleAuthError(
+    error as Error,
+    Astro,
+    session.refreshToken,
+  );
+
+  if (authResult.shouldRetry && authResult.newTokens) {
+    const updatedSession = {
+      ...session,
+      accessToken: authResult.newTokens.accessToken,
+      refreshToken: authResult.newTokens.refreshToken,
+      expiresIn: authResult.newTokens.expiresIn,
+    };
+    setSession(Astro, updatedSession);
+
+    try {
+      condoOptions = await listClientCondoOptions(updatedSession.accessToken);
+    } catch (retryError) {
+      console.error("Retry failed:", retryError);
+      return Astro.redirect("/login");
+    }
+  } else if (authResult.shouldRedirect) {
+    return Astro.redirect("/login");
+  } else {
+    condoOptions = [];
   }
 }
 
@@ -176,7 +218,6 @@ try {
             }
           </p>
         </div>
-
         {
           latestPreference && (
             <div class="bg-muted/30 rounded-lg p-6 mb-8">
@@ -256,9 +297,8 @@ try {
             </div>
           )
         }
-
         {
-          options.length === 0 ? (
+          options.length === 0 && condoOptions.length === 0 && (
             <div class="text-center py-12">
               <h2 class="text-2xl font-bold text-foreground mb-4">
                 No Options Yet
@@ -269,11 +309,37 @@ try {
               </p>
               <p class="text-sm text-muted-foreground">Check back soon.</p>
             </div>
-          ) : (
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {options.map((option) => (
-                <OptionCard option={option} client:load />
-              ))}
+          )
+        }
+        {
+          options.length > 0 && (
+            <div class="mt-16">
+              <div class="mb-8 text-center">
+                <h2 class="text-3xl font-bold text-foreground mb-4">
+                  Community Rentals Listings
+                </h2>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {options.map((option) => (
+                  <OptionCard option={option} client:load />
+                ))}
+              </div>
+            </div>
+          )
+        }
+        {
+          condoOptions.length > 0 && (
+            <div class="mt-16">
+              <div class="mb-8 text-center">
+                <h2 class="text-3xl font-bold text-foreground mb-4">
+                  Condo Listings
+                </h2>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {condoOptions.map((option) => (
+                  <CondoOptionCard option={option} client:load />
+                ))}
+              </div>
             </div>
           )
         }

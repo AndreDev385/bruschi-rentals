@@ -27,6 +27,8 @@ h6 {
   --color-mocha: #5d4738;
   --color-primary: oklch(58.6% 0.253 17.585);
 
+  --color-favorite: #f59e0b;
+
   --shadow-s:
     inset 0 1px 2px #ffffff30, 0 1px 2px #00000030, 0 2px 4px #00000015;
 

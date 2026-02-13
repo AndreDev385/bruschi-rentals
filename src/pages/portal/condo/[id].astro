@@ -1,0 +1,318 @@
+---
+export const prerender = false;
+
+import { ChevronLeft, MapPin, BedDouble, Bath, Maximize } from "lucide-react";
+import invariant from "tiny-invariant";
+
+import Layout from "@/layouts/Layout.astro";
+import { getSession, setSession } from "@/lib/auth";
+import type { CondoOptionDetailed } from "@/types";
+import { fetchCondoOption } from "@/services/condos.server";
+import { handleAuthError } from "@/lib/auth-utils";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import FavoriteButton from "@/components/portal/FavoriteButton";
+import MediaGallery from "@/components/MediaGallery";
+import { Card, CardContent } from "@/components/ui/card";
+import FeedbackForm from "@/components/portal/FeedbackForm";
+
+const session = await getSession(Astro);
+
+if (!session) {
+  return Astro.redirect("/login");
+}
+
+const cookies = Astro.request.headers.get("cookie") || "";
+const hasSeenWelcome = cookies.includes("welcome_seen=true");
+
+const url = new URL(Astro.request.url);
+const search = url.search;
+
+if (!hasSeenWelcome) {
+  return Astro.redirect("/welcome");
+}
+
+const accessToken = session.accessToken;
+
+const { id } = Astro.params;
+invariant(id);
+
+let condo: CondoOptionDetailed;
+
+try {
+  condo = await fetchCondoOption(id, accessToken);
+} catch (error) {
+  console.log("ERROR: id ", error);
+  const authResult = await handleAuthError(
+    error as Error,
+    Astro,
+    session.refreshToken,
+  );
+
+  if (authResult.shouldRetry && authResult.newTokens) {
+    const updatedSession = {
+      ...session,
+      accessToken: authResult.newTokens.accessToken,
+      refreshToken: authResult.newTokens.refreshToken,
+      expiresIn: authResult.newTokens.expiresIn,
+    };
+    setSession(Astro, updatedSession);
+
+    try {
+      condo = await fetchCondoOption(id, updatedSession.accessToken);
+    } catch (retryError) {
+      console.error("Retry failed:", retryError);
+      return Astro.redirect("/login");
+    }
+  } else if (authResult.shouldRedirect) {
+    return Astro.redirect("/login");
+  } else {
+    return Astro.redirect("/portal");
+  }
+}
+
+const formatPrice = (cents: number) => {
+  return `$${(cents / 100).toLocaleString()}`;
+};
+
+const formatBaths = (full: number, half: number) => {
+  if (half === 0) return `${full}`;
+  return `${full}.${half === 5 ? "5" : half}`;
+};
+
+const fullAddress =
+  `${condo.street_number} ${condo.compass_point} ${condo.street_name} ${condo.unit_number}`.trim();
+const neighborhoodCity = `${condo.city}`;
+---
+
+<Layout>
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-card border-b border-border">
+    <div class="max-w-4xl mx-auto py-4 px-4">
+      <div class="flex items-center justify-between">
+        <Button type="button" variant="ghost">
+          <a href={`/portal${search}`} class="flex items-center gap-1">
+            <ChevronLeft className="h-4 w-4" />
+            Back to Options
+          </a>
+        </Button>
+
+        <FavoriteButton
+          optionId={condo.id}
+          initialFavorited={condo.favorited}
+          actionType="condo"
+          client:load
+        />
+      </div>
+    </div>
+  </header>
+
+  <section class="min-h-screen bg-background">
+    <div class="container mx-auto">
+      <!-- Media Gallery -->
+      <div class="max-w-4xl mx-auto">
+        <MediaGallery
+          apartmentVideos={[]}
+          buildingVideos={[]}
+          apartmentImages={condo.images}
+          buildingImages={[]}
+          client:load
+        />
+      </div>
+
+      <!-- Property Details -->
+      <div class="max-w-4xl mx-auto space-y-8 pb-12 p-4">
+        <!-- Header -->
+        <div class="space-y-4">
+          <div class="flex flex-wrap gap-2">
+            <Badge className="font-bold">MLS #{condo.mls_number}</Badge>
+            <Badge className="font-bold">{condo.property_type}</Badge>
+            {
+              condo.status && (
+                <Badge className="font-bold" variant="secondary">
+                  {condo.status}
+                </Badge>
+              )
+            }
+          </div>
+
+          <div>
+            <h1 class="text-3xl md:text-4xl font-bold mb-2">
+              {fullAddress}
+            </h1>
+            <div class="flex items-center gap-2 text-muted-foreground">
+              <MapPin className="h-5 w-5" />
+              <span class="text-lg">{neighborhoodCity}</span>
+            </div>
+          </div>
+
+          <!-- Price -->
+          <div>
+            <div class="text-3xl font-bold text-primary" id="price-display">
+              {formatPrice(condo.list_price)}
+              <span class="text-lg text-muted-foreground font-normal"
+                >/month</span
+              >
+            </div>
+            <div class="text-sm text-muted-foreground mt-1">
+              ${
+                condo.price_per_sqft > 0
+                  ? (condo.price_per_sqft / 100).toFixed(2)
+                  : "0.00"
+              }/sqft
+            </div>
+            {
+              condo.association_fee > 0 && (
+                <div class="text-sm text-muted-foreground mt-1">
+                  Association Fee: {formatPrice(condo.association_fee)}
+                  {condo.association_fee_frequency &&
+                    ` (${condo.association_fee_frequency})`}
+                </div>
+              )
+            }
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="grid grid-cols-3 gap-4">
+            <Card>
+              <CardContent className="p-4 flex flex-col items-center">
+                <BedDouble className="h-6 w-6 text-muted-foreground mb-2" />
+                <div class="text-2xl font-bold">{condo.beds}</div>
+                <div class="text-sm text-muted-foreground">
+                  {condo.beds === 1 ? "Bedroom" : "Bedrooms"}
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 flex flex-col items-center">
+                <Bath className="h-6 w-6 text-muted-foreground mb-2" />
+                <div class="text-2xl font-bold">
+                  {formatBaths(condo.full_baths, condo.half_baths)}
+                </div>
+                <div class="text-sm text-muted-foreground">Baths</div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4 flex flex-col items-center">
+                <Maximize className="h-6 w-6 text-muted-foreground mb-2" />
+                <div class="text-2xl font-bold">
+                  {condo.sqft === 0 ? "N/A" : condo.sqft}
+                </div>
+                <div class="text-sm text-muted-foreground">Sq Ft</div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Reference Note */}
+          <div
+            class="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4"
+          >
+            <div class="flex items-start gap-3">
+              <div class="text-amber-600 dark:text-amber-400 mt-0.5">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    fill-rule="evenodd"
+                    d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                    clip-rule="evenodd"></path>
+                </svg>
+              </div>
+              <div class="text-sm text-amber-800 dark:text-amber-200">
+                <strong>Important Note:</strong> All prices, images, and details
+                shown are for reference purposes only and based on MLS listing data.
+                The actual price and final details will be confirmed during the application,
+                taking into account availability.
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* Amenities */}
+        {
+          condo.amenities.length > 0 && (
+            <div class="space-y-3">
+              <h2 class="text-2xl font-semibold">Amenities</h2>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {condo.amenities.map((amenity) => (
+                  <div class="flex items-center gap-2 text-muted-foreground">
+                    <div class="h-2 w-2 rounded-full bg-primary" />
+                    <span>{amenity}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        }
+
+        {/* Equipment & Appliances */}
+        {
+          condo.equipment_appliances.length > 0 && (
+            <div class="space-y-3">
+              <h2 class="text-2xl font-semibold">Equipment & Appliances</h2>
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                {condo.equipment_appliances.map((item) => (
+                  <div class="flex items-center gap-2 text-muted-foreground">
+                    <div class="h-2 w-2 rounded-full bg-primary" />
+                    <span>{item}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        }
+
+        {/* Additional Details */}
+        <div class="space-y-3">
+          <h2 class="text-2xl font-semibold">Property Details</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {
+              condo.pool_description && (
+                <div class="bg-muted/30 rounded-lg p-4">
+                  <div class="text-sm font-medium text-muted-foreground mb-1">
+                    Pool
+                  </div>
+                  <div>{condo.pool_description}</div>
+                </div>
+              )
+            }
+            {
+              condo.parking_description && (
+                <div class="bg-muted/30 rounded-lg p-4">
+                  <div class="text-sm font-medium text-muted-foreground mb-1">
+                    Parking
+                  </div>
+                  <div>{condo.parking_description}</div>
+                </div>
+              )
+            }
+            {
+              condo.pet_description && (
+                <div class="bg-muted/30 rounded-lg p-4">
+                  <div class="text-sm font-medium text-muted-foreground mb-1">
+                    Pet Policy
+                  </div>
+                  <div>{condo.pet_description}</div>
+                </div>
+              )
+            }
+            {
+              condo.zip_code && (
+                <div class="bg-muted/30 rounded-lg p-4">
+                  <div class="text-sm font-medium text-muted-foreground mb-1">
+                    Zip Code
+                  </div>
+                  <div>{condo.zip_code}</div>
+                </div>
+              )
+            }
+          </div>
+        </div>
+        {/* Feedback */}
+        <FeedbackForm
+          optionId={condo.id}
+          initialFeedback={condo.feedback || ""}
+          actionType="condo"
+          client:load
+        />
+      </div>
+    </div>
+  </section>
+</Layout>

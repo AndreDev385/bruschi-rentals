@@ -1,18 +1,20 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Heart, Loader2 } from "lucide-react";
-import { toast } from "sonner";
 import { actions } from "astro:actions";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { Loader2, Star } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 interface FavoriteButtonProps {
   optionId: string;
   initialFavorited: boolean;
+  actionType?: "option" | "condo";
 }
 
 const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   optionId,
   initialFavorited,
+  actionType = "option",
 }) => {
   const [isFavorited, setIsFavorited] = useState(initialFavorited);
   const [loading, setLoading] = useState(false);
@@ -20,7 +22,11 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
   const handleToggle = async () => {
     setLoading(true);
     try {
-      await actions.toggleFavorite({ optionId });
+      if (actionType === "condo") {
+        await actions.toggleCondoFavorite({ condoOptionId: optionId });
+      } else {
+        await actions.toggleFavorite({ optionId });
+      }
       setIsFavorited(!isFavorited);
       toast.success(
         !isFavorited ? "Added to favorites" : "Removed from favorites",
@@ -38,10 +44,10 @@ const FavoriteButton: React.FC<FavoriteButtonProps> = ({
       {loading ? (
         <Loader2 className="size-6 animate-spin" />
       ) : (
-        <Heart
+        <Star
           className={cn(
             "size-6",
-            isFavorited ? "fill-primary text-primary" : "text-foreground",
+            isFavorited ? "fill-favorite text-favorite" : "text-foreground",
           )}
         />
       )}

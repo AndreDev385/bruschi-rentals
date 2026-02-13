@@ -127,3 +127,72 @@ export type ClientOptionDetailed = ClientOption & {
   is_high_rise: boolean;
   has_view: boolean;
 };
+
+// Condo Option types for MLS listings
+export type CondoOption = {
+  id: string;
+  client_id: string;
+  selected_by: string;
+  mls_number: string;
+  beds: number;
+  full_baths: number;
+  half_baths: number;
+  sqft: number;
+  street_number: string;
+  compass_point: string;
+  street_name: string;
+  unit_number: string;
+  city: string;
+  zip_code: string;
+  list_price: number;
+  price_per_sqft: number;
+  association_fee: number;
+  association_fee_frequency: string;
+  amenities: string[];
+  equipment_appliances: string[];
+  pool_description: string;
+  parking_description: string;
+  pet_description: string;
+  agent_name: string;
+  agent_phone: string;
+  agent_email: string;
+  office_name: string;
+  images: string[];
+  virtual_tour: string;
+  photo_count: number;
+  mls_metadata: Record<string, unknown>;
+  property_type: string;
+  status: string;
+  list_date: string;
+  seen: boolean;
+  favorited: boolean;
+  feedback: string;
+  seen_at: string;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CondoOptionRead = CondoOption & {
+  selected_by_name: string;
+};
+
+export type CondoOptionDetailed = CondoOption & {
+  selected_by_name: string;
+};
+
+export const ToggleCondoFavoriteSchema = z.object({
+  condoOptionId: z.string(),
+});
+
+export type ToggleCondoFavoriteInput = z.infer<
+  typeof ToggleCondoFavoriteSchema
+>;
+
+export const SubmitCondoFeedbackSchema = z.object({
+  condoOptionId: z.string(),
+  feedback: z.string(),
+});
+
+export type SubmitCondoFeedbackInput = z.infer<
+  typeof SubmitCondoFeedbackSchema
+>;

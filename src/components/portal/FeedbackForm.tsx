@@ -1,17 +1,19 @@
-import { useState } from "react";
+import { actions } from "astro:actions";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
-import { actions } from "astro:actions";
 
 interface FeedbackFormProps {
   optionId: string;
   initialFeedback: string;
+  actionType?: "option" | "condo";
 }
 
 const FeedbackForm: React.FC<FeedbackFormProps> = ({
   optionId,
   initialFeedback,
+  actionType = "option",
 }) => {
   const [feedback, setFeedback] = useState(initialFeedback);
   const [submitted, setSubmitted] = useState(!!initialFeedback);
@@ -21,7 +23,14 @@ const FeedbackForm: React.FC<FeedbackFormProps> = ({
     e.preventDefault();
     setLoading(true);
     try {
-      await actions.submitFeedback({ optionId, feedback });
+      if (actionType === "condo") {
+        await actions.submitCondoFeedback({
+          condoOptionId: optionId,
+          feedback,
+        });
+      } else {
+        await actions.submitFeedback({ optionId, feedback });
+      }
       setSubmitted(true);
       toast.success("Feedback submitted successfully!");
     } catch (error) {

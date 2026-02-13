@@ -116,9 +116,9 @@ export const LoginForm: React.FC = () => {
         <h1 className="text-3xl font-bold text-obsidian mb-2">Log In</h1>
         <p className="text-mocha">Access your personalized rental portal</p>
         <div className="text-xs text-gray-500 bg-soft-dark/30 p-3 rounded-lg">
-          <p >
-            <strong>Secure Access:</strong> We send a one-time verification code to your phone
-            to confirm your identity and keep your account secure.
+          <p>
+            <strong>Secure Access:</strong> We send a one-time verification code
+            to your phone to confirm your identity and keep your account secure.
           </p>
         </div>
       </div>
@@ -162,8 +162,8 @@ export const LoginForm: React.FC = () => {
         <div className="space-y-6">
           <div className="text-center mb-4">
             <p className="text-sm text-mocha">
-              We've sent a <strong>6-digit code</strong>. Enter
-              it below to continue.
+              We've sent a <strong>6-digit code</strong>. Enter it below to
+              continue.
             </p>
           </div>
 

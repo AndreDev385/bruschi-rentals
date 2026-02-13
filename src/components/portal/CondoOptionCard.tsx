@@ -1,37 +1,38 @@
-import type React from "react";
-import { useState, useEffect, useRef } from "react";
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { MapPin, ChevronLeft, ChevronRight, Star } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { actions } from "astro:actions";
-import type { ClientOptionRead } from "@/types";
-import { Button } from "../ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import type { CondoOptionRead } from "@/types";
+import {
+  Bath,
+  BedDouble,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Star,
+} from "lucide-react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "../ui/button";
 
-interface OptionCardProps {
-  option: ClientOptionRead;
+interface CondoOptionCardProps {
+  option: CondoOptionRead;
 }
 
-const formatApartmentType = (type: string) => {
-  switch (type) {
-    case "Studio":
-      return "Studio";
-    case "OneBed":
-      return "1 Bedroom";
-    case "TwoBeds":
-      return "2 Bedrooms";
-    case "ThreeOrMoreBeds":
-      return "3+ Bedrooms";
-    default:
-      return type;
-  }
+const formatPrice = (cents: number) => {
+  return `$${(cents / 100).toLocaleString()}`;
 };
 
-const OptionCard = ({ option }: OptionCardProps) => {
+const formatBaths = (full: number, half: number) => {
+  if (half === 0) return `${full}`;
+  return `${full}.${half === 5 ? "5" : half}`;
+};
+
+const CondoOptionCard = ({ option }: CondoOptionCardProps) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [imageLoaded, setImageLoaded] = useState<boolean[]>(() =>
-    new Array(option.building_images.length).fill(false),
+    new Array(option.images.length).fill(false),
   );
   const [isFavorited, setIsFavorited] = useState(option.favorited);
   const imgRef = useRef<HTMLImageElement>(null);
@@ -50,7 +51,7 @@ const OptionCard = ({ option }: OptionCardProps) => {
     e.preventDefault();
     e.stopPropagation();
     setCurrentImageIndex((prev) =>
-      prev === 0 ? option.building_images.length - 1 : prev - 1,
+      prev === 0 ? option.images.length - 1 : prev - 1,
     );
   };
 
@@ -58,7 +59,7 @@ const OptionCard = ({ option }: OptionCardProps) => {
     e.preventDefault();
     e.stopPropagation();
     setCurrentImageIndex((prev) =>
-      prev === option.building_images.length - 1 ? 0 : prev + 1,
+      prev === option.images.length - 1 ? 0 : prev + 1,
     );
   };
 
@@ -67,7 +68,9 @@ const OptionCard = ({ option }: OptionCardProps) => {
     e.stopPropagation();
 
     try {
-      const result = await actions.toggleFavorite({ optionId: option.id });
+      const result = await actions.toggleCondoFavorite({
+        condoOptionId: option.id,
+      });
       if (result.data) {
         setIsFavorited(result.data.favorited);
         toast.success(
@@ -82,14 +85,16 @@ const OptionCard = ({ option }: OptionCardProps) => {
     }
   };
 
-  const currentImage = option.building_images[currentImageIndex];
+  const currentImage = option.images[currentImageIndex];
+  const address =
+    `${option.street_number} ${option.compass_point} ${option.street_name} ${option.unit_number}`.trim();
 
   return (
-    <a href={`/portal/${option.id}`} data-astro-prefetch="load">
+    <a href={`/portal/condo/${option.id}`} data-astro-prefetch="load">
       <Card className="overflow-hidden hover:shadow-m transition-shadow group cursor-pointer">
         {/* Image Carousel */}
         <div className="relative aspect-[4/3] bg-muted overflow-hidden">
-          {option.building_images.length > 0 ? (
+          {option.images.length > 0 ? (
             <>
               {!imageLoaded[currentImageIndex] && (
                 <div className="absolute inset-0 bg-muted animate-pulse" />
@@ -97,7 +102,7 @@ const OptionCard = ({ option }: OptionCardProps) => {
               <img
                 ref={imgRef}
                 src={currentImage}
-                alt={option.building_name}
+                alt={address}
                 className={cn(
                   "w-full h-full object-cover transition-opacity duration-300",
                   imageLoaded[currentImageIndex] ? "opacity-100" : "opacity-0",
@@ -112,7 +117,7 @@ const OptionCard = ({ option }: OptionCardProps) => {
                 onError={() =>
                   setImageLoaded((prev) => {
                     const newLoaded = [...prev];
-                    newLoaded[currentImageIndex] = true; // Show even on error to avoid gray
+                    newLoaded[currentImageIndex] = true;
                     return newLoaded;
                   })
                 }
@@ -125,7 +130,7 @@ const OptionCard = ({ option }: OptionCardProps) => {
           )}
 
           {/* Image Navigation */}
-          {option.building_images.length > 1 && (
+          {option.images.length > 1 && (
             <>
               <button
                 type="button"
@@ -144,6 +149,13 @@ const OptionCard = ({ option }: OptionCardProps) => {
                 <ChevronRight className="h-4 w-4" />
               </button>
             </>
+          )}
+
+          {/* New Badge */}
+          {!option.seen && (
+            <Badge className="absolute top-3 left-3 bg-primary text-primary-foreground pointer-events-none">
+              New
+            </Badge>
           )}
 
           {/* Favorite Button */}
@@ -168,9 +180,9 @@ const OptionCard = ({ option }: OptionCardProps) => {
           </Button>
 
           {/* Image Dots */}
-          {option.building_images.length > 1 && (
+          {option.images.length > 1 && (
             <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-              {option.building_images.map((image, index) => (
+              {option.images.map((image, index) => (
                 <div
                   key={image}
                   className={cn(
@@ -190,44 +202,62 @@ const OptionCard = ({ option }: OptionCardProps) => {
           {/* Price and Title */}
           <div className="space-y-2">
             <div className="flex flex-col">
-              <h3 className="font-semibold text-lg leading-tight line-clamp-1">
-                {option.building_name}
-              </h3>
-              <span className="font-bold text-primary text-lg whitespace-nowrap">
-                ${option.price_range.from.toLocaleString()} - $
-                {option.price_range.to.toLocaleString()}
+              <span className="font-bold text-primary text-xl whitespace-nowrap">
+                {formatPrice(option.list_price)}
               </span>
+              <h3 className="font-semibold text-lg leading-tight line-clamp-1">
+                {address}
+              </h3>
             </div>
             <div className="flex items-center gap-1.5 text-muted-foreground">
-              <MapPin className="size-6 flex-shrink-0" />
-              <span className="line-clamp-1">{option.neighborhood_name}</span>
+              <MapPin className="size-5 flex-shrink-0" />
+              <span className="line-clamp-1">{option.city}</span>
             </div>
           </div>
 
-          {/* Apartment Type */}
-          <div className="text-sm text-muted-foreground">
-            {formatApartmentType(option.apartment_type)}
+          {/* Beds and Baths */}
+          <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-1.5">
+              <BedDouble className="size-4" />
+              <span>
+                {option.beds} {option.beds === 1 ? "Bed" : "Beds"}
+              </span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Bath className="size-4" />
+              <span>
+                {formatBaths(option.full_baths, option.half_baths)} Baths
+              </span>
+            </div>
+            <div className="text-muted-foreground">
+              {option.sqft ? option.sqft : "N/A"} sqft
+            </div>
           </div>
 
           {/* Amenities Preview */}
-          {option.building_amenities.length > 0 && (
+          {option.amenities.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {option.building_amenities.slice(0, 3).map((amenity) => (
+              {option.amenities.slice(0, 3).map((amenity) => (
                 <Badge key={amenity} variant="secondary" className="text-xs">
                   {amenity}
                 </Badge>
               ))}
-              {option.building_amenities.length > 3 && (
+              {option.amenities.length > 3 && (
                 <Badge variant="secondary" className="text-xs">
-                  +{option.building_amenities.length - 3} more
+                  +{option.amenities.length - 3} more
                 </Badge>
               )}
             </div>
           )}
+
+          {/* MLS Number */}
+          <div className="text-xs text-muted-foreground">
+            MLS #: {option.mls_number}
+          </div>
         </div>
       </Card>
     </a>
   );
 };
 
-export default OptionCard;
+export default CondoOptionCard;

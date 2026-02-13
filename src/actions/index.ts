@@ -6,8 +6,10 @@ import { authClient } from "@/lib/auth0.server";
 import { sanitizePhoneNumber } from "@/lib/utils";
 import {
   SendLoginCodeSchema,
+  SubmitCondoFeedbackSchema,
   SubmitFeedbackSchema,
   SubmitPreferencesSchema,
+  ToggleCondoFavoriteSchema,
   ToggleFavoriteSchema,
 } from "@/types";
 import type { APIContext } from "astro";
@@ -229,14 +231,9 @@ export const server = {
         }
 
         // Send passwordless SMS with code
-        await authClient.passwordless.sendSMS(
-          {
-            phone_number: sanitizedPhone,
-          },
-          {
-            timeoutInSeconds: 10, // Reduce timeout to 10s to fail faster
-          },
-        );
+        await authClient.passwordless.sendSMS({
+          phone_number: sanitizedPhone,
+        });
 
         return { success: true, message: "Login code sent via SMS" };
       } catch (error: unknown) {
@@ -540,6 +537,274 @@ export const server = {
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message: "An unexpected error occurred.",
+        });
+      }
+    },
+  }),
+
+  toggleCondoFavorite: defineAction({
+    input: ToggleCondoFavoriteSchema,
+    handler: async (input: { condoOptionId: string }, context) => {
+      try {
+        // Get the user session to access the access token
+        const session = await getSession(context);
+
+        if (!session) {
+          throw new ActionError({
+            code: "UNAUTHORIZED",
+            message: "You must be logged in to perform this action.",
+          });
+        }
+
+        const { condoOptionId } = input;
+
+        let currentSession = session;
+
+        // First, get the current condo option to know its current favorite status
+        let getResponse: Response;
+
+        try {
+          getResponse = await fetch(
+            `${API_URL}/api/v1/clients/me/condo-options/${condoOptionId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${session.accessToken}`,
+              },
+            },
+          );
+        } catch (error) {
+          const authResult = await handleAuthError(
+            error as Error,
+            context,
+            session.refreshToken,
+          );
+
+          if (authResult.shouldRetry && authResult.newTokens) {
+            // Update session
+            const updatedSession = {
+              ...session,
+              accessToken: authResult.newTokens.accessToken,
+              refreshToken: authResult.newTokens.refreshToken,
+              expiresIn: authResult.newTokens.expiresIn,
+            };
+            setSession(context as APIContext, updatedSession);
+            currentSession = updatedSession;
+
+            // Retry
+            getResponse = await fetch(
+              `${API_URL}/api/v1/clients/me/condo-options/${condoOptionId}`,
+              {
+                headers: {
+                  Authorization: `Bearer ${updatedSession.accessToken}`,
+                },
+              },
+            );
+          } else if (authResult.shouldRedirect) {
+            throw new ActionError({
+              code: "UNAUTHORIZED",
+              message: "Session expired. Please log in again.",
+            });
+          } else {
+            throw error;
+          }
+        }
+
+        if (!getResponse.ok) {
+          if (getResponse.status === 401) {
+            throw new ActionError({
+              code: "UNAUTHORIZED",
+              message: "Session expired. Please log in again.",
+            });
+          }
+          throw new ActionError({
+            code: "NOT_FOUND",
+            message: "Condo option not found.",
+          });
+        }
+
+        const option = await getResponse.json();
+        const newFavorited = !option.favorited;
+
+        // Now toggle the favorite status
+        let patchResponse: Response;
+
+        try {
+          patchResponse = await fetch(
+            `${API_URL}/api/v1/clients/me/condo-options/${condoOptionId}/favorite`,
+            {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${currentSession.accessToken}`,
+              },
+              body: JSON.stringify({ favorited: newFavorited }),
+            },
+          );
+        } catch (error) {
+          const authResult = await handleAuthError(
+            error as Error,
+            context,
+            currentSession.refreshToken,
+          );
+
+          if (authResult.shouldRetry && authResult.newTokens) {
+            // Update session
+            const updatedSession = {
+              ...currentSession,
+              accessToken: authResult.newTokens.accessToken,
+              refreshToken: authResult.newTokens.refreshToken,
+              expiresIn: authResult.newTokens.expiresIn,
+            };
+            setSession(context as APIContext, updatedSession);
+            currentSession = updatedSession;
+
+            // Retry
+            patchResponse = await fetch(
+              `${API_URL}/api/v1/clients/me/condo-options/${condoOptionId}/favorite`,
+              {
+                method: "PATCH",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${updatedSession.accessToken}`,
+                },
+                body: JSON.stringify({ favorited: newFavorited }),
+              },
+            );
+          } else if (authResult.shouldRedirect) {
+            throw new ActionError({
+              code: "UNAUTHORIZED",
+              message: "Session expired. Please log in again.",
+            });
+          } else {
+            throw error;
+          }
+        }
+
+        if (!patchResponse.ok) {
+          if (patchResponse.status === 401) {
+            throw new ActionError({
+              code: "UNAUTHORIZED",
+              message: "Session expired. Please log in again.",
+            });
+          }
+          throw new ActionError({
+            code: "BAD_REQUEST",
+            message: "Failed to update condo favorite status.",
+          });
+        }
+
+        return { favorited: newFavorited };
+      } catch (error) {
+        if (error instanceof ActionError) {
+          throw error;
+        }
+
+        console.error("Error toggling condo favorite:", error);
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "An error occurred while updating condo favorite status.",
+        });
+      }
+    },
+  }),
+
+  submitCondoFeedback: defineAction({
+    input: SubmitCondoFeedbackSchema,
+    handler: async (
+      input: { condoOptionId: string; feedback: string },
+      context,
+    ) => {
+      try {
+        // Get the user session to access the access token
+        const session = await getSession(context);
+
+        if (!session) {
+          throw new ActionError({
+            code: "UNAUTHORIZED",
+            message: "You must be logged in to perform this action.",
+          });
+        }
+
+        const { condoOptionId, feedback } = input;
+
+        let currentSession = session;
+
+        let patchResponse: Response;
+
+        try {
+          patchResponse = await fetch(
+            `${API_URL}/api/v1/clients/me/condo-options/${condoOptionId}/feedback`,
+            {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${currentSession.accessToken}`,
+              },
+              body: JSON.stringify({ feedback }),
+            },
+          );
+        } catch (error) {
+          const authResult = await handleAuthError(
+            error as Error,
+            context,
+            currentSession.refreshToken,
+          );
+
+          if (authResult.shouldRetry && authResult.newTokens) {
+            // Update session
+            const updatedSession = {
+              ...currentSession,
+              accessToken: authResult.newTokens.accessToken,
+              refreshToken: authResult.newTokens.refreshToken,
+              expiresIn: authResult.newTokens.expiresIn,
+            };
+            setSession(context as APIContext, updatedSession);
+            currentSession = updatedSession;
+
+            // Retry
+            patchResponse = await fetch(
+              `${API_URL}/api/v1/clients/me/condo-options/${condoOptionId}/feedback`,
+              {
+                method: "PATCH",
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${updatedSession.accessToken}`,
+                },
+                body: JSON.stringify({ feedback }),
+              },
+            );
+          } else if (authResult.shouldRedirect) {
+            throw new ActionError({
+              code: "UNAUTHORIZED",
+              message: "Session expired. Please log in again.",
+            });
+          } else {
+            throw error;
+          }
+        }
+
+        if (!patchResponse.ok) {
+          if (patchResponse.status === 401) {
+            throw new ActionError({
+              code: "UNAUTHORIZED",
+              message: "Session expired. Please log in again.",
+            });
+          }
+          throw new ActionError({
+            code: "BAD_REQUEST",
+            message: "Failed to submit condo feedback.",
+          });
+        }
+
+        return { success: true };
+      } catch (error) {
+        if (error instanceof ActionError) {
+          throw error;
+        }
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message:
+            "An unexpected error occurred while submitting condo feedback.",
         });
       }
     },
