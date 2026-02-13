@@ -285,8 +285,8 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
               className="text-primary hover:text-primary/80 underline"
             >
               Terms of Service
-            </a>
-            {" "}and{" "}
+            </a>{" "}
+            and{" "}
             <a
               href="/privacy-policy"
               target="_blank"
@@ -295,13 +295,16 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
             >
               Privacy Policy
             </a>
-            {", including consent to receive SMS messages for authentication and rental service updates."}
+            {
+              ", including consent to receive SMS messages for authentication codes AND rental recommendations."
+            }
           </label>
         </div>
         <p className="text-xs text-gray-500 mt-2 ml-7">
-          By submitting this form, you consent to receive SMS messages including one-time
-          password codes to access your client portal. Message and data rates may apply.
-          Reply STOP to opt-out of non-essential messages.
+          By submitting this form, you consent to receive SMS messages including
+          authentication codes AND rental recommendations. Message and data
+          rates may apply. Reply STOP to opt-out of recommendation messages (authentication
+          codes will still be sent)
         </p>
         {errors.termsAccepted && (
           <p className="text-sm text-red-500 mt-1">{errors.termsAccepted}</p>
