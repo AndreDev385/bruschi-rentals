@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { SelectButton } from "@/components/ui/select-button";
+import { NeighborhoodGrid } from "@/components/ui/neighborhood-grid";
 import type { Neighborhood, FormData } from "@/types";
 
 interface NeighborhoodStepProps {
@@ -43,16 +43,11 @@ const NeighborhoodStep: React.FC<NeighborhoodStepProps> = ({
         </h3>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
-        {neighborhoods.map((neighborhood) => (
-          <SelectButton
-            key={neighborhood.id}
-            isSelected={selectedNeighborhood?.id === neighborhood.id}
-            onClick={() => handleNeighborhoodSelect(neighborhood)}
-            value={neighborhood.name}
-          />
-        ))}
-      </div>
+      <NeighborhoodGrid
+        neighborhoods={neighborhoods}
+        selectedId={selectedNeighborhood?.id}
+        onSelect={handleNeighborhoodSelect}
+      />
     </div>
   );
 };

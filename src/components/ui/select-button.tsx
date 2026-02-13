@@ -17,7 +17,7 @@ const SelectButton: React.FC<SelectButtonProps> = ({
     <button
       type="button"
       className={cn(
-        "p-4 rounded-lg transition-all text-center bg-soft-light shadow-m",
+        "px-4 py-2 rounded-lg transition-all text-center bg-soft-light shadow-m",
         isSelected
           ? "bg-primary text-white"
           : "hover:bg-primary hover:text-white",

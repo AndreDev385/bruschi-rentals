@@ -303,8 +303,8 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
         <p className="text-xs text-gray-500 mt-2 ml-7">
           By submitting this form, you consent to receive SMS messages including
           authentication codes AND rental recommendations. Message and data
-          rates may apply. Reply STOP to opt-out of recommendation messages (authentication
-          codes will still be sent)
+          rates may apply. Reply STOP to opt-out of recommendation messages
+          (authentication codes will still be sent)
         </p>
         {errors.termsAccepted && (
           <p className="text-sm text-red-500 mt-1">{errors.termsAccepted}</p>
