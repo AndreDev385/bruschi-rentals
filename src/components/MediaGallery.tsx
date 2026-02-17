@@ -35,8 +35,6 @@ const MediaGallery: React.FC<MediaGalleryProps> = ({
     ...buildingImages.map((url) => ({ type: "image" as const, url })),
   ];
 
-  console.log({ media });
-
   const swiperRef = useRef<SwiperRef>(null);
   const modalSwiperRef = useRef<SwiperRef>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);

@@ -175,7 +175,7 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
               value={formValues.email}
               onChange={(e) => handleInputChange("email", e.target.value)}
               className={errors.email ? "border-red-500" : ""}
-              placeholder="Email Address"
+              placeholder="Email Address *"
               required
             />
           </Label>
@@ -293,18 +293,15 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
               rel="noopener noreferrer"
               className="text-primary hover:text-primary/80 underline"
             >
-              Privacy Policy
+              Privacy Policy.
             </a>
-            {
-              ", including consent to receive SMS messages for authentication codes AND rental recommendations."
-            }
           </label>
         </div>
         <p className="text-xs text-gray-500 mt-2 ml-7">
-          By submitting this form, you consent to receive SMS messages including
-          authentication codes AND rental recommendations. Message and data
-          rates may apply. Reply STOP to opt-out of recommendation messages
-          (authentication codes will still be sent)
+          By submitting this form, <strong>you consent to receive SMS messages</strong> including
+          authentication codes AND rental recommendations. Message frequency varies. Message and data
+          rates may apply. Reply <strong>STOP to opt-out</strong> of recommendation messages
+          (authentication codes will still be sent to access the portal). <strong>Reply HELP for support.</strong>
         </p>
         {errors.termsAccepted && (
           <p className="text-sm text-red-500 mt-1">{errors.termsAccepted}</p>
