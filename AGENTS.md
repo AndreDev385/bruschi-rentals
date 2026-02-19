@@ -59,44 +59,44 @@
 
 Server-side actions defined in `src/actions/index.ts`:
 
-| Action | Description | Auth Required | Rate Limit |
-|--------|-------------|---------------|------------|
-| `submitPreferences` | Submit client preferences from multi-step form | No | No |
-| `sendLoginCode` | Send passwordless login email with verification code | No | 5/min/email |
-| `sendLoginCodeSMS` | Send passwordless login SMS with verification code | No | 5/min/phone |
-| `toggleFavorite` | Toggle favorite status on apartment option | Yes (session) | No |
-| `submitFeedback` | Submit feedback on an apartment option | Yes (session) | No |
-| `toggleCondoFavorite` | Toggle favorite status on condo option | Yes (session) | No |
-| `submitCondoFeedback` | Submit feedback on a condo option | Yes (session) | No |
+| Action                | Description                                          | Auth Required | Rate Limit  |
+| --------------------- | ---------------------------------------------------- | ------------- | ----------- |
+| `submitPreferences`   | Submit client preferences from multi-step form       | No            | No          |
+| `sendLoginCode`       | Send passwordless login email with verification code | No            | 5/min/email |
+| `sendLoginCodeSMS`    | Send passwordless login SMS with verification code   | No            | 5/min/phone |
+| `toggleFavorite`      | Toggle favorite status on apartment option           | Yes (session) | No          |
+| `submitFeedback`      | Submit feedback on an apartment option               | Yes (session) | No          |
+| `toggleCondoFavorite` | Toggle favorite status on condo option               | Yes (session) | No          |
+| `submitCondoFeedback` | Submit feedback on a condo option                    | Yes (session) | No          |
 
 ### Page Routes
 
 #### Public Pages
 
-| Route | File | Description |
-|-------|------|-------------|
-| `/` | `index.astro` | Landing page with multi-step preferences form |
-| `/login` | `login.astro` | Login page with email/SMS options |
-| `/terms-of-service` | `terms-of-service.astro` | Terms of service |
-| `/privacy-policy` | `privacy-policy.astro` | Privacy policy |
+| Route               | File                     | Description                                   |
+| ------------------- | ------------------------ | --------------------------------------------- |
+| `/`                 | `index.astro`            | Landing page with multi-step preferences form |
+| `/login`            | `login.astro`            | Login page with email/SMS options             |
+| `/terms-of-service` | `terms-of-service.astro` | Terms of service                              |
+| `/privacy-policy`   | `privacy-policy.astro`   | Privacy policy                                |
 
 #### Auth Pages
 
-| Route | File | Description |
-|-------|------|-------------|
+| Route            | File                  | Description                        |
+| ---------------- | --------------------- | ---------------------------------- |
 | `/auth/callback` | `auth/callback.astro` | Auth0 callback handler after login |
-| `/logout` | `logout.astro` | Logout handler |
+| `/logout`        | `logout.astro`        | Logout handler                     |
 
 #### Portal Pages (Authenticated)
 
-| Route | File | Description |
-|-------|------|-------------|
-| `/portal` | `portal.astro` | Main portal dashboard |
-| `/portal/:id` | `portal/[id].astro` | View specific apartment option details |
-| `/portal/condo/:id` | `portal/condo/[id].astro` | View specific condo option details |
-| `/welcome` | `welcome.astro` | Welcome page after first login |
-| `/account-created` | `account-created.astro` | Account created confirmation |
-| `/more-info` | `more-info.astro` | Request more information |
+| Route               | File                      | Description                            |
+| ------------------- | ------------------------- | -------------------------------------- |
+| `/portal`           | `portal.astro`            | Main portal dashboard                  |
+| `/portal/:id`       | `portal/[id].astro`       | View specific apartment option details |
+| `/portal/condo/:id` | `portal/condo/[id].astro` | View specific condo option details     |
+| `/welcome`          | `welcome.astro`           | Welcome page after first login         |
+| `/account-created`  | `account-created.astro`   | Account created confirmation           |
+| `/more-info`        | `more-info.astro`         | Request more information               |
 
 ### Multi-Step Form Flow
 
@@ -104,13 +104,13 @@ The landing page contains a multi-step form (`FormWizard.tsx`) for collecting cl
 
 #### Form Steps
 
-| Step | Component | Title | Fields |
-|------|-----------|-------|--------|
-| 1 | `NeighborhoodStep` | Choose Neighborhood | Select preferred Miami neighborhood |
-| 2 | `ApartmentTypeStep` | Apartment Size | Studio, 1BR, 2BR, 3+ BR |
-| 3 | `BudgetStep` | Budget | Monthly rent budget (fetches price range from API) |
-| 4 | `DatePickerStep` | Move-in Date | Desired move-in date |
-| 5 | `ContactFormStep` | Contact Information | Name, phone, email (optional), notes |
+| Step | Component           | Title               | Fields                                             |
+| ---- | ------------------- | ------------------- | -------------------------------------------------- |
+| 1    | `NeighborhoodStep`  | Choose Neighborhood | Select preferred Miami neighborhood                |
+| 2    | `ApartmentTypeStep` | Apartment Size      | Studio, 1BR, 2BR, 3+ BR                            |
+| 3    | `BudgetStep`        | Budget              | Monthly rent budget (fetches price range from API) |
+| 4    | `DatePickerStep`    | Move-in Date        | Desired move-in date                               |
+| 5    | `ContactFormStep`   | Contact Information | Name, phone, email (optional), notes               |
 
 #### Form Behavior
 
@@ -122,6 +122,7 @@ The landing page contains a multi-step form (`FormWizard.tsx`) for collecting cl
 #### Submission
 
 On final step submission:
+
 1. Client-side validation ensures all required fields are present
 2. `actions.submitPreferences` is called with all form data
 3. Data is transformed and sent to `POST /api/v1/clients/public`

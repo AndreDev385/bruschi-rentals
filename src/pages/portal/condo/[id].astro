@@ -15,6 +15,7 @@ import FavoriteButton from "@/components/portal/FavoriteButton";
 import MediaGallery from "@/components/MediaGallery";
 import { Card, CardContent } from "@/components/ui/card";
 import FeedbackForm from "@/components/portal/FeedbackForm";
+import { ScheduleTourButton } from "@/components/portal/ScheduleTourButton";
 
 const session = await getSession(Astro);
 
@@ -202,6 +203,9 @@ const neighborhoodCity = `${condo.city}`;
               </CardContent>
             </Card>
           </div>
+
+          <!-- Schedule Tour Button -->
+          <ScheduleTourButton client:load />
 
           {/* Reference Note */}
           <div

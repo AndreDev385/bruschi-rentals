@@ -298,10 +298,13 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
           </label>
         </div>
         <p className="text-xs text-gray-500 mt-2 ml-7">
-          By submitting this form, <strong>you consent to receive SMS messages</strong> including
-          authentication codes AND rental recommendations. Message frequency varies. Message and data
-          rates may apply. Reply <strong>STOP to opt-out</strong> of recommendation messages
-          (authentication codes will still be sent to access the portal). <strong>Reply HELP for support.</strong>
+          By submitting this form,{" "}
+          <strong>you consent to receive SMS messages</strong> including
+          authentication codes AND rental recommendations. Message frequency
+          varies. Message and data rates may apply. Reply{" "}
+          <strong>STOP to opt-out</strong> of recommendation messages
+          (authentication codes will still be sent to access the portal).{" "}
+          <strong>Reply HELP for support.</strong>
         </p>
         {errors.termsAccepted && (
           <p className="text-sm text-red-500 mt-1">{errors.termsAccepted}</p>
