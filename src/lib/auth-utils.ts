@@ -13,7 +13,7 @@ export interface AuthErrorResult {
   shouldRetry?: boolean;
   newTokens?: {
     accessToken: string;
-    refreshToken: string;
+    refreshToken: string | undefined;
     expiresIn?: number;
   };
 }
@@ -40,9 +40,7 @@ export async function handleAuthError(
   // Attempt refresh if refresh token available
   if (refreshToken) {
     try {
-      console.log("Attempting token refresh...");
       const newTokens = await refreshAccessToken(refreshToken);
-      console.log("Token refresh successful");
       return {
         shouldRedirect: false,
         shouldRetry: true,

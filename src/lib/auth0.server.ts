@@ -13,17 +13,13 @@ export const managementClient = new ManagementClient({
 });
 
 export async function refreshAccessToken(refreshToken: string) {
-  try {
-    const tokens = await authClient.refreshToken({
-      refresh_token: refreshToken,
-    });
-    return {
-      accessToken: tokens.access_token,
-      refreshToken: tokens.refresh_token, // May be the same or new
-      expiresIn: tokens.expires_in,
-    };
-  } catch (error) {
-    console.error("Token refresh failed:", error);
-    throw error;
+  const response = await authClient.oauth.refreshTokenGrant({
+    refresh_token: refreshToken,
+  })
+  const tokens = response.data
+  return {
+    accessToken: tokens.access_token,
+    refreshToken: tokens.refresh_token,
+    expiresIn: tokens.expires_in,
   }
 }
