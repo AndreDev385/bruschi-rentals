@@ -5,7 +5,7 @@ export function ScheduleTourButton() {
   return (
     <div className="my-4">
       <a
-        href="https://wa.link/o1xxw6"
+        href="https://wa.link/32qxlm"
         target="_blank"
         rel="noopener noreferrer"
       >
