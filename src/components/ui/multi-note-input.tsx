@@ -39,12 +39,6 @@ export const MultiNoteInput: React.FC<MultiNoteInputProps> = ({
     }
   };
 
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus();
-    }
-  }, []);
-
   return (
     <div>
       {notes.length < maxNotes && (
