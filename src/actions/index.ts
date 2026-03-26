@@ -230,6 +230,36 @@ export const server = {
           });
         }
 
+        // Verify phone is registered before sending SMS
+        const verifyResponse = await fetch(
+          `${API_URL}/api/v1/clients/verify-phone?phone=${encodeURIComponent(sanitizedPhone)}`,
+        );
+
+        if (!verifyResponse.ok) {
+          if (verifyResponse.status === 404) {
+            const data = await verifyResponse.json();
+            throw new ActionError({
+              code: "BAD_REQUEST",
+              message:
+                data.message ||
+                "This phone number is not registered. Please complete the preferences form first to log in.",
+            });
+          }
+          throw new ActionError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Unable to verify phone. Please try again.",
+          });
+        }
+
+        const verifyData = await verifyResponse.json();
+        if (!verifyData.exists) {
+          throw new ActionError({
+            code: "BAD_REQUEST",
+            message:
+              "This phone number is not registered. Please complete the preferences form first to log in.",
+          });
+        }
+
         // Send passwordless SMS with code
         await authClient.passwordless.sendSMS({
           phone_number: sanitizedPhone,
