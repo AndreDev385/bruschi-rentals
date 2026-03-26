@@ -39,6 +39,11 @@ export const LoginForm: React.FC = () => {
         phoneNumber: phoneNumber.trim(),
       });
 
+      // Check for action error first
+      if (result.error) {
+        throw result.error;
+      }
+
       if (result.data?.success) {
         toast.success("Code sent! Check your phone.");
         setCurrentStep("code");
