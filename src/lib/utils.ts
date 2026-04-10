@@ -1,14 +1,9 @@
-import { snakeCase } from "change-case";
 import { type ClassValue, clsx } from "clsx";
 import { createContext, useContext } from "react";
 import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
-}
-
-export function toSnakeCase(str: string): string {
-  return snakeCase(str);
 }
 
 export function debounce<T extends (...args: unknown[]) => void>(
