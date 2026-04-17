@@ -7,6 +7,7 @@ import { PhoneInputComponent } from "@/components/ui/PhoneInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { sanitizePhoneNumber } from "@/lib/utils";
 
 //type LoginMethod = "phone" | "email";
 type LoginStep = "input" | "code";
@@ -76,11 +77,19 @@ export const LoginForm: React.FC = () => {
 
     setIsVerifyingCode(true);
     try {
+      // Sanitize phone to match the format used when sending the code
+      let sanitizedPhone: string;
+      try {
+        sanitizedPhone = sanitizePhoneNumber(phoneNumber);
+      } catch {
+        throw new Error("Invalid phone number format. Please use international format.");
+      }
+
       const response = await fetch("/api/auth/verify-code-sms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          phoneNumber: phoneNumber.trim(),
+          phoneNumber: sanitizedPhone,
           code: code.trim(),
         }),
       });
