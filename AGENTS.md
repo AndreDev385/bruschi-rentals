@@ -356,6 +356,30 @@ if (typeof data === "string") {
 - **Rate limiting**: 5 attempts per minute for auth operations
 - **Input validation**: All user inputs validated with Zod schemas
 
+#### Anti-Abuse Measures
+
+The landing page implements multiple layers of protection against registration abuse:
+
+| Measure | Location | Description |
+|---------|----------|-------------|
+| Honeypot field | `ContactFormStep.tsx` | Hidden `website` field catches bots |
+| Client-side validation | `types.ts` | Zod schema rejects filled honeypot |
+| Rate limiting | `actions/index.ts` | In-memory rate limiter (5/min) |
+| Cloudflare Turnstile | `FormWizard.tsx` | Invisible bot verification widget |
+
+**Honeypot Implementation**:
+- Hidden field with `display:none` and `tabIndex=-1` in `ContactFormStep.tsx`
+- Zod validation in `SubmitPreferencesSchema` rejects submissions with filled honeypot
+- Backend validates honeypot via `ClientPublicCreateInput.Website`
+
+**Cloudflare Turnstile**:
+- Invisible widget rendered in `FormWizard.tsx` on final step
+- Site key from `PUBLIC_TURNSTILE_SITE_KEY` environment variable
+- Token passed to backend via `turnstileToken` in form submission
+- Backend verifies via `TURNSTILE_SECRET` environment variable
+
+**Real User Impact**: None - humans don't see or fill the hidden field
+
 #### API Security
 
 - **Environment variables**: Use `astro:env/server` for secrets

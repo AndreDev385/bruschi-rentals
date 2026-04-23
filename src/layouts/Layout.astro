@@ -5,6 +5,9 @@ import "sonner/dist/styles.css";
 
 import "../styles/global.css";
 import "animate.css";
+
+// Cloudflare Turnstile - Bot protection
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
 ---
 
 <!doctype html>
@@ -51,6 +54,11 @@ import "animate.css";
     />
 
     <ClientRouter />
+
+    <!-- Cloudflare Turnstile - Bot Protection -->
+    {siteKey && (
+      <script is:inline src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    )}
   </head>
   <body>
     <slot />

@@ -13,6 +13,9 @@ import ContactFormStep from "./ContactFormStep";
 import DatePickerStep from "./DatePickerStep";
 import NeighborhoodStep from "./NeighborhoodStep";
 
+// Cloudflare Turnstile - get site key from environment
+const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
+
 const steps = [
   { id: 1, component: NeighborhoodStep, title: "Choose Neighborhood" },
   { id: 2, component: ApartmentTypeStep, title: "Apartment Size" },
@@ -35,6 +38,8 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
   } | null>(null);
   const [isLoadingPriceRange, setIsLoadingPriceRange] = useState(false);
   const budgetStepRef = useRef<BudgetStepRef>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const turnstileRef = useRef<HTMLDivElement>(null);
 
   // Context for step completion tracking without formData re-renders
   const setStepCompleted = useCallback((stepId: number, completed: boolean) => {
@@ -89,6 +94,39 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
       setOrigin(originParam);
     }
   }, []);
+
+  // Initialize Cloudflare Turnstile
+  useEffect(() => {
+    if (!TURNSTILE_SITE_KEY || !turnstileRef.current) return;
+
+    const script = document.createElement("script");
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+    script.async = true;
+    script.defer = true;
+    document.body.appendChild(script);
+
+    const checkTurnstile = setInterval(() => {
+      if (typeof (window as { turnstile?: { render: (el: HTMLElement, options: { sitekey: string; callback: (token: string) => void }) => void } }).turnstile !== "undefined") {
+        clearInterval(checkTurnstile);
+        
+        const turnstile = (window as { turnstile: { render: (el: HTMLElement, options: { sitekey: string; callback: (token: string) => void }) => void } }).turnstile;
+        if (turnstileRef.current) {
+          turnstile.render(turnstileRef.current, {
+            sitekey: TURNSTILE_SITE_KEY,
+            callback: (token: string) => {
+              setTurnstileToken(token);
+            },
+          });
+        }
+      }
+    }, 100);
+
+    return () => {
+      clearInterval(checkTurnstile);
+      const scriptEl = document.querySelector('script[src*="turnstile"]');
+      if (scriptEl) scriptEl.remove();
+    };
+  }, [TURNSTILE_SITE_KEY]);
 
   const totalSteps = steps.length;
   const progress = (currentStep / totalSteps) * 100;
@@ -208,6 +246,13 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
       return;
     }
 
+    // Validate Turnstile token if enabled
+    if (TURNSTILE_SITE_KEY && !turnstileToken) {
+      toast.error("Please complete the verification first.");
+      setIsSubmitting(false);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const result = await actions.submitPreferences({
@@ -221,6 +266,7 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
         moveInDate: formData.moveInDate,
         tourType: formData.tourType,
         notes: formData.notes,
+        turnstileToken, // Pass Turnstile token for verification
       });
 
       // Check if the action returned an error
@@ -326,6 +372,17 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
                 : "Next"}
           </Button>
         </div>
+
+        {/* Cloudflare Turnstile Widget - Bot Protection */}
+        {TURNSTILE_SITE_KEY && currentStep === totalSteps && (
+          <div className="mt-4">
+            <div
+              ref={turnstileRef}
+              className="flex justify-center"
+              data-sitekey={TURNSTILE_SITE_KEY}
+            />
+          </div>
+        )}
       </div>
     </StepCompletionContext.Provider>
   );

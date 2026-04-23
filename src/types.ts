@@ -37,9 +37,18 @@ export const SubmitPreferencesSchema = z.object({
   tourType: z.enum(["OnSite", "Virtual"]),
   notes: z.array(z.string()).optional(),
   termsAccepted: z.boolean().optional(),
+  // Honeypot field - bots will fill this, humans won't
+  website: z.string().optional(),
+  // Cloudflare Turnstile token - optional but validated server-side
+  turnstileToken: z.string().optional(),
+}).refine((data) => !data.website || data.website === "", {
+  message: "Invalid submission",
+  path: ["website"],
 });
 
-export type FormData = Partial<z.infer<typeof SubmitPreferencesSchema>>;
+export type FormData = Partial<z.infer<typeof SubmitPreferencesSchema>> & {
+  website?: string; // Honeypot field
+};
 
 // Client Option types matching backend
 export type ClientOption = {

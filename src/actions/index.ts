@@ -81,6 +81,10 @@ export const server = {
             tour_type: input.tourType,
             notes: input.notes ?? [],
           },
+          // Honeypot field - pass to backend for additional validation
+          website: input.website || "",
+          // Cloudflare Turnstile token - verify server-side
+          turnstile_token: input.turnstileToken || "",
         };
 
         // Send to new external backend endpoint
