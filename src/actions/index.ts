@@ -47,6 +47,186 @@ if (!API_URL) {
 }
 
 export const server = {
+  // New verification actions
+  checkClientVerification: defineAction({
+    input: z.object({
+      phoneNumber: z
+        .string()
+        .regex(/^\+[1-9]\d{1,14}$/, "Invalid phone number format"),
+    }),
+    handler: async (input) => {
+      try {
+        // Sanitize phone number
+        let sanitizedPhone: string;
+        try {
+          sanitizedPhone = sanitizePhoneNumber(input.phoneNumber);
+        } catch {
+          throw new ActionError({
+            code: "BAD_REQUEST",
+            message:
+              "Invalid phone number format. Please use international format with + prefix.",
+          });
+        }
+
+        // Check if client exists and is verified
+        const response = await fetch(
+          `${API_URL}/api/v1/clients/verify-phone?phone=${encodeURIComponent(sanitizedPhone)}`,
+        );
+
+        if (response.status === 404) {
+          const data = await response.json();
+          return {
+            exists: false,
+            verified: false,
+            clientId: null,
+            emailVerified: false,
+            phoneVerified: false,
+            message: data.message || "Phone number not registered",
+          };
+        }
+
+        if (!response.ok) {
+          throw new ActionError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Unable to verify phone. Please try again.",
+          });
+        }
+
+        const data = await response.json();
+        return {
+          exists: data.exists,
+          verified: data.verified,
+          clientId: data.client_id || null,
+          email: data.email || null, // Add email for resend functionality
+          emailVerified: data.email_verified || false,
+          phoneVerified: data.phone_verified || false,
+        };
+      } catch (error) {
+        if (error instanceof ActionError) {
+          throw error;
+        }
+        console.error("Error checking client verification:", error);
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "An error occurred while checking verification status.",
+        });
+      }
+    },
+  }),
+
+  sendPhoneVerificationCode: defineAction({
+    input: z.object({
+      clientId: z.string().uuid("Invalid client ID"),
+    }),
+    handler: async (input, context) => {
+      try {
+        // Get session to get access token
+        const session = await getSession(context);
+        if (!session) {
+          throw new ActionError({
+            code: "UNAUTHORIZED",
+            message: "You must be logged in to send verification codes.",
+          });
+        }
+
+        // Rate limit: 3 attempts per 5 minutes per client
+        const rateKey = `phone-verification:${input.clientId}`;
+        if (!checkRateLimit(rateKey, 3, 5 * 60 * 1000)) {
+          throw new ActionError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Too many attempts. Please wait 5 minutes and try again.",
+          });
+        }
+
+        // Send phone verification code via backend API
+        const response = await fetch(
+          `${API_URL}/api/v1/clients/${input.clientId}/send-phone-code`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${session.accessToken}`,
+            },
+          },
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          if (response.status === 429) {
+            throw new ActionError({
+              code: "TOO_MANY_REQUESTS",
+              message:
+                errorData.error || "Too many requests. Please try again later.",
+            });
+          }
+          throw new ActionError({
+            code: "BAD_REQUEST",
+            message:
+              errorData.error || "Failed to send verification code.",
+          });
+        }
+
+        return { success: true };
+      } catch (error) {
+        if (error instanceof ActionError) {
+          throw error;
+        }
+        console.error("Error sending phone verification code:", error);
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "An error occurred while sending verification code.",
+        });
+      }
+    },
+  }),
+
+  resendVerificationEmail: defineAction({
+    input: z.object({
+      email: z.string().email("Invalid email address"),
+    }),
+    handler: async (input, context) => {
+      try {
+        // Rate limit: 3 attempts per hour per email
+        const ip =
+          context.request.headers.get("x-forwarded-for") ||
+          context.request.headers.get("cf-connecting-ip") ||
+          "unknown";
+        const rateKey = `resend-email:${input.email}:${ip}`;
+        if (!checkRateLimit(rateKey, 3, 60 * 60 * 1000)) {
+          throw new ActionError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Too many attempts. Please wait an hour and try again.",
+          });
+        }
+
+        // Call backend resend endpoint
+        const response = await fetch(
+          `${API_URL}/api/v1/clients/verify-email/resend`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: input.email }),
+          },
+        );
+
+        // Always return success to prevent email enumeration
+        // (backend already does this, but being explicit here)
+        if (!response.ok) {
+          // Don't reveal error - return success anyway
+          return { success: true };
+        }
+
+        return { success: true };
+      } catch (error) {
+        if (error instanceof ActionError) {
+          throw error;
+        }
+        console.error("Error resending verification email:", error);
+        // Return success anyway to prevent enumeration
+        return { success: true };
+      }
+    },
+  }),
+
   submitPreferences: defineAction({
     input: SubmitPreferencesSchema,
     handler: async (input: z.infer<typeof SubmitPreferencesSchema>) => {

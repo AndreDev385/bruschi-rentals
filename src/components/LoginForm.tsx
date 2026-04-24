@@ -9,13 +9,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { sanitizePhoneNumber } from "@/lib/utils";
 
-//type LoginMethod = "phone" | "email";
-type LoginStep = "input" | "code";
+type LoginStep = "input" | "code" | "email_required";
 
 export const LoginForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<LoginStep>("input");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [code, setCode] = useState("");
+  const [clientId, setClientId] = useState<string>("");
+  const [emailFromCheck, setEmailFromCheck] = useState<string | null>(null);
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
 
@@ -36,16 +37,43 @@ export const LoginForm: React.FC = () => {
 
     setIsSendingCode(true);
     try {
-      const result = await actions.sendLoginCodeSMS({
+      // First check if client exists and is verified
+      const result = await actions.checkClientVerification({
         phoneNumber: phoneNumber.trim(),
       });
 
-      // Check for action error first
       if (result.error) {
+        // Handle errors from checkClientVerification
         throw result.error;
       }
 
-      if (result.data?.success) {
+      const data = result.data;
+      
+      if (!data?.exists) {
+        // Client doesn't exist - redirect to registration
+        toast.error("This phone number is not registered. Please complete the preferences form first.");
+        window.location.href = `/more-info${search}`;
+        return;
+      }
+
+      if (!data?.verified) {
+        // Client exists but not fully verified
+        setClientId(data?.clientId || "");
+        setEmailFromCheck(data?.email || null); // Store email for resend
+        setCurrentStep("email_required");
+        return;
+      }
+
+      // Client exists and is verified - proceed with SMS login
+      const smsResult = await actions.sendLoginCodeSMS({
+        phoneNumber: phoneNumber.trim(),
+      });
+
+      if (smsResult.error) {
+        throw smsResult.error;
+      }
+
+      if (smsResult.data?.success) {
         toast.success("Code sent! Check your phone.");
         setCurrentStep("code");
       }
@@ -59,11 +87,74 @@ export const LoginForm: React.FC = () => {
       // Special handling for service unavailable
       if (message.includes("unavailable") || message.includes("timeout")) {
         toast.error(message, {
-          duration: 6000, // Show longer for important messages
+          duration: 6000,
+        });
+      } else if (message.includes("Too many") || message.includes("rate limit") || message.includes("wait")) {
+        // Rate limit error - show longer duration for user to read
+        toast.error(message, {
+          duration: 10000,
         });
       } else {
         toast.error(message);
       }
+    } finally {
+      setIsSendingCode(false);
+    }
+  };
+
+  const handleSendPhoneCode = async () => {
+    // This is called when client needs to verify phone
+    setIsSendingCode(true);
+    try {
+      const result = await actions.sendPhoneVerificationCode({
+        clientId: clientId,
+      });
+
+      if (result.error) {
+        throw result.error;
+      }
+
+      if (result.data?.success) {
+        toast.success("SMS code sent to your phone!");
+        setCurrentStep("code");
+      }
+    } catch (error: unknown) {
+      console.error("Send phone code error:", error);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to send code. Please try again.";
+      toast.error(message);
+    } finally {
+      setIsSendingCode(false);
+    }
+  };
+
+  const handleResendEmail = async () => {
+    if (!emailFromCheck) {
+      toast.error("No email on file. Please use a different phone number or contact support.");
+      return;
+    }
+
+    setIsSendingCode(true);
+    try {
+      const result = await actions.resendVerificationEmail({
+        email: emailFromCheck,
+      });
+
+      if (result.error) {
+        // Don't show error - always show success
+        toast.success("Verification email sent. Check your inbox.");
+        return;
+      }
+
+      if (result.data?.success) {
+        toast.success("Verification email sent. Check your inbox and spam folder.");
+      }
+    } catch (error: unknown) {
+      console.error("Resend email error:", error);
+      // Don't show error to user
+      toast.success("Verification email sent. Check your inbox.");
     } finally {
       setIsSendingCode(false);
     }
@@ -116,6 +207,7 @@ export const LoginForm: React.FC = () => {
   const handleBackToPhone = () => {
     setCurrentStep("input");
     setCode("");
+    setClientId("");
   };
 
   const handleCodeInput = (value: string) => {
@@ -158,7 +250,7 @@ export const LoginForm: React.FC = () => {
             disabled={isSendingCode}
           >
             {isSendingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isSendingCode ? "Sending..." : "Send Code"}
+            {isSendingCode ? "Checking..." : "Continue"}
           </Button>
           <div className="flex justify-center items-center">
             <Button
@@ -168,6 +260,66 @@ export const LoginForm: React.FC = () => {
             >
               Already have a code?
             </Button>
+          </div>
+        </div>
+      )}
+
+      {currentStep === "email_required" && (
+        <div className="space-y-6">
+          <div className="text-center mb-4">
+            <div className="text-4xl mb-4">📧</div>
+            <h2 className="text-xl font-bold text-obsidian mb-2">
+              Complete Your Verification
+            </h2>
+            <p className="text-sm text-mocha">
+              You need to verify your email and phone before logging in.
+            </p>
+          </div>
+
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm">
+            <p className="font-medium text-amber-800 mb-2">Verification Required</p>
+            <ul className="text-amber-700 space-y-1">
+              <li>✓ Check your email for a verification link</li>
+              <li>✓ Click the link to verify your email</li>
+              <li>✓ Then click "Send SMS Code" below</li>
+            </ul>
+          </div>
+
+          <Button
+            type="button"
+            onClick={handleResendEmail}
+            className="w-full font-bold"
+            size="lg"
+            variant="outline"
+            disabled={isSendingCode}
+          >
+            {isSendingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isSendingCode ? "Sending..." : "Resend Verification Email"}
+          </Button>
+
+          <Button
+            type="button"
+            onClick={handleSendPhoneCode}
+            className="w-full font-bold"
+            size="lg"
+            disabled={isSendingCode}
+          >
+            {isSendingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {isSendingCode ? "Sending..." : "Send SMS Code"}
+          </Button>
+
+          <Button
+            type="button"
+            onClick={handleBackToPhone}
+            disabled={isSendingCode}
+            className="w-full font-bold"
+            variant="link"
+          >
+            ← Use a different phone number
+          </Button>
+
+          <div className="text-center text-sm text-gray-500">
+            <p>Need help? Contact us at support@bruschitentals.com</p>
           </div>
         </div>
       )}
