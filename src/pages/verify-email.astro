@@ -1,0 +1,27 @@
+---
+export const prerender = false;
+
+import Layout from "@/layouts/Layout.astro";
+import PublicLayout from "@/layouts/PublicLayout.astro";
+import { VerifyEmailForm } from "@/components/VerifyEmailForm";
+import { getSession } from "@/lib/auth";
+
+const session = await getSession(Astro);
+---
+
+<Layout>
+  <PublicLayout>
+    <section class="relative w-full min-h-screen flex items-center justify-center py-12">
+      <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md mx-auto">
+          <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold text-obsidian mb-2">Email Verification</h1>
+            <p class="text-mocha">Verify your email address to continue</p>
+          </div>
+          
+          <VerifyEmailForm client:load />
+        </div>
+      </div>
+    </section>
+  </PublicLayout>
+</Layout>

@@ -65,7 +65,7 @@ export const POST = async ({ request }: { request: Request }) => {
     const rateKey = `${phoneNumber}:${ip}`;
     if (!checkRateLimit(rateKey, 5, 60 * 1000)) {
       return Response.json(
-        { error: "Too many attempts. Please try again later." },
+        { error: "Too many code attempts. Please wait 1 minute and try again." },
         { status: 429 },
       );
     }

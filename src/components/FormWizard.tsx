@@ -95,9 +95,9 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
     }
   }, []);
 
-  // Initialize Cloudflare Turnstile
+  // Initialize Cloudflare Turnstile (supports both visible and invisible modes)
   useEffect(() => {
-    if (!TURNSTILE_SITE_KEY || !turnstileRef.current) return;
+    if (!TURNSTILE_SITE_KEY) return;
 
     const script = document.createElement("script");
     script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
@@ -105,28 +105,45 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
     script.defer = true;
     document.body.appendChild(script);
 
-    const checkTurnstile = setInterval(() => {
-      if (typeof (window as { turnstile?: { render: (el: HTMLElement, options: { sitekey: string; callback: (token: string) => void }) => void } }).turnstile !== "undefined") {
-        clearInterval(checkTurnstile);
-        
-        const turnstile = (window as { turnstile: { render: (el: HTMLElement, options: { sitekey: string; callback: (token: string) => void }) => void } }).turnstile;
-        if (turnstileRef.current) {
-          turnstile.render(turnstileRef.current, {
-            sitekey: TURNSTILE_SITE_KEY,
-            callback: (token: string) => {
-              setTurnstileToken(token);
-            },
-          });
-        }
-      }
-    }, 100);
-
-    return () => {
-      clearInterval(checkTurnstile);
-      const scriptEl = document.querySelector('script[src*="turnstile"]');
-      if (scriptEl) scriptEl.remove();
-    };
+    // For invisible mode, we'll get token on form submit
+    // For visible mode, we render a widget (handled elsewhere in the component)
   }, [TURNSTILE_SITE_KEY]);
+
+  // Get Turnstile token - works for both invisible and visible modes
+  // Skip Turnstile in development or if not configured
+  const getTurnstileToken = useCallback(async (): Promise<string> => {
+    if (!TURNSTILE_SITE_KEY) return "";
+
+    // Skip if still in development (no HTTPS, localhost issues with invisible)
+    if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+      console.log("Skipping Turnstile in development");
+      return "";
+    }
+
+    return new Promise((resolve) => {
+      // @ts-ignore - Turnstile API
+      if (window.turnstile && turnstileRef.current) {
+        // @ts-ignore - Turnstile execute for invisible mode
+        window.turnstile.execute(turnstileRef.current, {
+          sitekey: TURNSTILE_SITE_KEY,
+          callback: (token: string) => {
+            resolve(token);
+          },
+          "error-callback": () => {
+            console.warn("Turnstile error - proceeding without token");
+            resolve("");
+          },
+          "timeout-callback": () => {
+            console.warn("Turnstile timeout - proceeding without token");
+            resolve("");
+          },
+        });
+      } else {
+        // Fallback for visible mode - use existing token from state
+        resolve(turnstileToken);
+      }
+    });
+  }, [TURNSTILE_SITE_KEY, turnstileToken]);
 
   const totalSteps = steps.length;
   const progress = (currentStep / totalSteps) * 100;
@@ -247,10 +264,17 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
     }
 
     // Validate Turnstile token if enabled
-    if (TURNSTILE_SITE_KEY && !turnstileToken) {
-      toast.error("Please complete the verification first.");
-      setIsSubmitting(false);
-      return;
+    // For invisible mode, we get token at submit time
+    // For visible mode, we need token from state
+    let finalTurnstileToken = turnstileToken;
+    if (TURNSTILE_SITE_KEY) {
+      // Get fresh token for invisible mode
+      finalTurnstileToken = await getTurnstileToken();
+      if (!finalTurnstileToken) {
+        toast.error("Verification failed. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -266,7 +290,7 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
         moveInDate: formData.moveInDate,
         tourType: formData.tourType,
         notes: formData.notes,
-        turnstileToken, // Pass Turnstile token for verification
+        turnstileToken: finalTurnstileToken,
       });
 
       // Check if the action returned an error
