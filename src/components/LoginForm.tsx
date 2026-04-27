@@ -56,15 +56,16 @@ export const LoginForm: React.FC = () => {
         return;
       }
 
-      if (!data?.verified) {
-        // Client exists but not fully verified
+      // Only require email verification (phone verification happens via Auth0 webhook on first login)
+      if (!data?.emailVerified) {
+        // Client exists but email not verified - redirect to verify email
         setClientId(data?.clientId || "");
-        setEmailFromCheck(data?.email || null); // Store email for resend
+        setEmailFromCheck(data?.email || null);
         setCurrentStep("email_required");
         return;
       }
 
-      // Client exists and is verified - proceed with SMS login
+      // Client exists and email is verified - proceed with SMS login (phone will be auto-verified via Auth0 webhook)
       const smsResult = await actions.sendLoginCodeSMS({
         phoneNumber: phoneNumber.trim(),
       });
@@ -103,15 +104,22 @@ export const LoginForm: React.FC = () => {
   };
 
   const handleSendPhoneCode = async () => {
-    // This is called when client needs to verify phone
+    // This is called when client needs to verify phone (unverified client, no session)
     setIsSendingCode(true);
     try {
       const result = await actions.sendPhoneVerificationCode({
-        clientId: clientId,
+        phoneNumber: phoneNumber,
       });
 
       if (result.error) {
-        throw result.error;
+        // Check if it's about email verification requirement
+        const errorMsg = result.error?.message || "";
+        if (errorMsg.includes("email") || errorMsg.includes("verify your email")) {
+          toast.error("Please verify your email first before requesting SMS code.");
+        } else {
+          throw result.error;
+        }
+        return;
       }
 
       if (result.data?.success) {
@@ -269,19 +277,19 @@ export const LoginForm: React.FC = () => {
           <div className="text-center mb-4">
             <div className="text-4xl mb-4">📧</div>
             <h2 className="text-xl font-bold text-obsidian mb-2">
-              Complete Your Verification
+              Verify Your Email
             </h2>
             <p className="text-sm text-mocha">
-              You need to verify your email and phone before logging in.
+              Please verify your email before logging in.
             </p>
           </div>
 
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm">
-            <p className="font-medium text-amber-800 mb-2">Verification Required</p>
+            <p className="font-medium text-amber-800 mb-2">Next Steps</p>
             <ul className="text-amber-700 space-y-1">
               <li>✓ Check your email for a verification link</li>
               <li>✓ Click the link to verify your email</li>
-              <li>✓ Then click "Send SMS Code" below</li>
+              <li>✓ Return here and login with your phone</li>
             </ul>
           </div>
 
@@ -299,17 +307,6 @@ export const LoginForm: React.FC = () => {
 
           <Button
             type="button"
-            onClick={handleSendPhoneCode}
-            className="w-full font-bold"
-            size="lg"
-            disabled={isSendingCode}
-          >
-            {isSendingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {isSendingCode ? "Sending..." : "Send SMS Code"}
-          </Button>
-
-          <Button
-            type="button"
             onClick={handleBackToPhone}
             disabled={isSendingCode}
             className="w-full font-bold"
@@ -319,7 +316,7 @@ export const LoginForm: React.FC = () => {
           </Button>
 
           <div className="text-center text-sm text-gray-500">
-            <p>Need help? Contact us at support@bruschitentals.com</p>
+            <p>After verifying your email, you can login with your phone.</p>
           </div>
         </div>
       )}

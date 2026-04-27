@@ -86,6 +86,19 @@ export const server = {
         }
 
         if (!response.ok) {
+          // 403 = phone exists but not fully verified - this is expected
+          if (response.status === 403) {
+            const data = await response.json();
+            return {
+              exists: data.exists || true,
+              verified: false,
+              clientId: data.client_id || null,
+              email: data.email || null,
+              emailVerified: data.email_verified || false,
+              phoneVerified: data.phone_verified || false,
+              message: data.message || "Please verify your email and phone before logging in",
+            };
+          }
           throw new ActionError({
             code: "INTERNAL_SERVER_ERROR",
             message: "Unable to verify phone. Please try again.",
@@ -109,71 +122,6 @@ export const server = {
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
           message: "An error occurred while checking verification status.",
-        });
-      }
-    },
-  }),
-
-  sendPhoneVerificationCode: defineAction({
-    input: z.object({
-      clientId: z.string().uuid("Invalid client ID"),
-    }),
-    handler: async (input, context) => {
-      try {
-        // Get session to get access token
-        const session = await getSession(context);
-        if (!session) {
-          throw new ActionError({
-            code: "UNAUTHORIZED",
-            message: "You must be logged in to send verification codes.",
-          });
-        }
-
-        // Rate limit: 3 attempts per 5 minutes per client
-        const rateKey = `phone-verification:${input.clientId}`;
-        if (!checkRateLimit(rateKey, 3, 5 * 60 * 1000)) {
-          throw new ActionError({
-            code: "TOO_MANY_REQUESTS",
-            message: "Too many attempts. Please wait 5 minutes and try again.",
-          });
-        }
-
-        // Send phone verification code via backend API
-        const response = await fetch(
-          `${API_URL}/api/v1/clients/${input.clientId}/send-phone-code`,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${session.accessToken}`,
-            },
-          },
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          if (response.status === 429) {
-            throw new ActionError({
-              code: "TOO_MANY_REQUESTS",
-              message:
-                errorData.error || "Too many requests. Please try again later.",
-            });
-          }
-          throw new ActionError({
-            code: "BAD_REQUEST",
-            message:
-              errorData.error || "Failed to send verification code.",
-          });
-        }
-
-        return { success: true };
-      } catch (error) {
-        if (error instanceof ActionError) {
-          throw error;
-        }
-        console.error("Error sending phone verification code:", error);
-        throw new ActionError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "An error occurred while sending verification code.",
         });
       }
     },
