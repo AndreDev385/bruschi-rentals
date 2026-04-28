@@ -12,12 +12,20 @@ if (!session) {
   return Astro.redirect("/login");
 }
 
-// Set welcome seen cookie server-side
+// Check if welcome page was already seen - if so, redirect to portal
+const welcomeSeen = Astro.cookies.get("welcome_seen");
+if (welcomeSeen?.value === "true") {
+  const search = new URL(Astro.request.url).search;
+  return Astro.redirect(`/portal${search}`);
+}
+
+// First time seeing welcome page - set the cookie
 Astro.cookies.set("welcome_seen", "true", {
   path: "/",
   httpOnly: false, // Allow client access if needed
   secure: import.meta.env.PROD,
   sameSite: "lax",
+  maxAge: 60 * 60 * 24 * 365, // 1 year - persist across sessions
 });
 
 const url = new URL(Astro.request.url);
