@@ -5,7 +5,7 @@ import { handleAuthError } from "@/lib/auth-utils";
 import { authClient } from "@/lib/auth0.server";
 import { sanitizePhoneNumber } from "@/lib/utils";
 import {
-  SendLoginCodeSchema,
+  
   SubmitCondoFeedbackSchema,
   SubmitFeedbackSchema,
   SubmitPreferencesSchema,
@@ -275,60 +275,6 @@ export const server = {
     },
   }),
 
-  sendLoginCode: defineAction({
-    input: SendLoginCodeSchema,
-    handler: async (input, context) => {
-      try {
-        const { email } = input;
-
-        // Rate limit: 5 attempts per minute per email
-        const ip =
-          context.request.headers.get("x-forwarded-for") ||
-          context.request.headers.get("cf-connecting-ip") ||
-          "unknown";
-        const rateKey = `${email}:${ip}`;
-        if (!checkRateLimit(rateKey, 5, 60 * 1000)) {
-          throw new ActionError({
-            code: "TOO_MANY_REQUESTS",
-            message: "Too many attempts. Please try again later.",
-          });
-        }
-
-        // Send passwordless email with code
-        await authClient.passwordless.sendEmail({
-          email,
-          send: "code",
-        });
-
-        return { success: true, message: "Login email sent" };
-      } catch (error: unknown) {
-        if (error instanceof ActionError) {
-          throw error;
-        }
-
-        console.error("Passwordless login error:", error);
-
-        // Handle specific Auth0 errors
-        let errorMessage = "Failed to send login email";
-        if (error instanceof Error && error.message) {
-          errorMessage = error.message;
-        } else if (typeof error === "object" && error && "response" in error) {
-          const err = error as {
-            response?: { data?: { error_description?: string } };
-          };
-          if (err.response?.data?.error_description) {
-            errorMessage = err.response.data.error_description;
-          }
-        }
-
-        throw new ActionError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: errorMessage,
-        });
-      }
-    },
-  }),
-
   sendLoginCodeSMS: defineAction({
     input: z.object({
       phoneNumber: z
@@ -349,16 +295,16 @@ export const server = {
           });
         }
 
-        // Rate limit: 5 attempts per minute per phone
+        // Rate limit: 6 OTP requests per phone per hour (aligns with Auth0 limit)
         const ip =
           context.request.headers.get("x-forwarded-for") ||
           context.request.headers.get("cf-connecting-ip") ||
           "unknown";
         const rateKey = `${sanitizedPhone}:${ip}`;
-        if (!checkRateLimit(rateKey, 5, 60 * 1000)) {
+        if (!checkRateLimit(rateKey, 6, 60 * 60 * 1000)) {
           throw new ActionError({
             code: "TOO_MANY_REQUESTS",
-            message: "Too many attempts. Please try again later.",
+            message: "Too many attempts. Please wait an hour and try again.",
           });
         }
 
