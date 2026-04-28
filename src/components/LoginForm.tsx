@@ -103,41 +103,6 @@ export const LoginForm: React.FC = () => {
     }
   };
 
-  const handleSendPhoneCode = async () => {
-    // This is called when client needs to verify phone (unverified client, no session)
-    setIsSendingCode(true);
-    try {
-      const result = await actions.sendPhoneVerificationCode({
-        phoneNumber: phoneNumber,
-      });
-
-      if (result.error) {
-        // Check if it's about email verification requirement
-        const errorMsg = result.error?.message || "";
-        if (errorMsg.includes("email") || errorMsg.includes("verify your email")) {
-          toast.error("Please verify your email first before requesting SMS code.");
-        } else {
-          throw result.error;
-        }
-        return;
-      }
-
-      if (result.data?.success) {
-        toast.success("SMS code sent to your phone!");
-        setCurrentStep("code");
-      }
-    } catch (error: unknown) {
-      console.error("Send phone code error:", error);
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Failed to send code. Please try again.";
-      toast.error(message);
-    } finally {
-      setIsSendingCode(false);
-    }
-  };
-
   const handleResendEmail = async () => {
     if (!emailFromCheck) {
       toast.error("No email on file. Please use a different phone number or contact support.");
