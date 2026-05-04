@@ -95,18 +95,46 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
     }
   }, []);
 
-  // Initialize Cloudflare Turnstile (supports both visible and invisible modes)
+  // Initialize Cloudflare Turnstile (invisible mode)
   useEffect(() => {
     if (!TURNSTILE_SITE_KEY) return;
 
+    const renderWidget = () => {
+      // @ts-ignore - Turnstile API
+      if (window.turnstile && turnstileRef.current) {
+        // @ts-ignore - Turnstile render for invisible mode
+        window.turnstile.render(turnstileRef.current, {
+          sitekey: TURNSTILE_SITE_KEY,
+          size: "invisible",
+          callback: (token: string) => {
+            setTurnstileToken(token);
+          },
+        });
+      }
+    };
+
+    // If script already loaded, render immediately
+    // @ts-ignore - Turnstile API
+    if (window.turnstile) {
+      renderWidget();
+      return;
+    }
+
+    // Load script
     const script = document.createElement("script");
     script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
     script.async = true;
     script.defer = true;
+    script.onload = renderWidget;
     document.body.appendChild(script);
 
-    // For invisible mode, we'll get token on form submit
-    // For visible mode, we render a widget (handled elsewhere in the component)
+    return () => {
+      // @ts-ignore - Turnstile API
+      if (window.turnstile && turnstileRef.current) {
+        // @ts-ignore - Turnstile remove
+        window.turnstile.remove(turnstileRef.current);
+      }
+    };
   }, [TURNSTILE_SITE_KEY]);
 
   // Get Turnstile token - works for both invisible and visible modes
@@ -125,21 +153,19 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
       if (window.turnstile && turnstileRef.current) {
         // @ts-ignore - Turnstile execute for invisible mode
         window.turnstile.execute(turnstileRef.current, {
-          sitekey: TURNSTILE_SITE_KEY,
           callback: (token: string) => {
             resolve(token);
           },
           "error-callback": () => {
-            console.warn("Turnstile error - proceeding without token");
+            console.warn("Turnstile execute error");
             resolve("");
           },
           "timeout-callback": () => {
-            console.warn("Turnstile timeout - proceeding without token");
+            console.warn("Turnstile execute timeout");
             resolve("");
           },
         });
       } else {
-        // Fallback for visible mode - use existing token from state
         resolve(turnstileToken);
       }
     });
@@ -397,13 +423,13 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
           </Button>
         </div>
 
-        {/* Cloudflare Turnstile Widget - Bot Protection */}
-        {TURNSTILE_SITE_KEY && currentStep === totalSteps && (
-          <div className="mt-4">
+        {/* Cloudflare Turnstile Widget - Bot Protection (invisible, always rendered) */}
+        {TURNSTILE_SITE_KEY && (
+          <div className="hidden">
             <div
               ref={turnstileRef}
-              className="flex justify-center"
               data-sitekey={TURNSTILE_SITE_KEY}
+              data-size="invisible"
             />
           </div>
         )}
