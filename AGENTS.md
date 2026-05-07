@@ -1,5 +1,34 @@
 # Landing AGENTS.md
 
+> **Harness Version**: 1.0
+> **Last Updated**: 2026-05-07
+> **Stack**: Astro + React (TypeScript), pnpm, Tailwind CSS v4
+
+## Branch Workflow
+
+```
+main    ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+  ↑                                                                           ↑
+  │  [HUMAN ONLY] merge after approval                                        │
+  │                                                                           │
+stage   ←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←←
+  ↑
+  │  [AGENT] commit directly or via PR to stage
+  │
+feature/agent-task-123
+```
+
+- **Agent target branch**: `stage` always.
+- **Human gate**: `main` merges require human operator approval.
+- **Emergency override**: If a critical fix is needed on `main`, the agent prepares it on `stage` and explicitly requests human merge with justification.
+
+## Agent Rules (OBLIGATORIO)
+
+1. **Run `./scripts/agent-check.sh fast` before considering a task done**.
+2. **Branch Rule — AGENT NEVER MERGES TO MAIN**: All agent work must be committed to the `stage` branch. `main` is protected and requires explicit human approval for any merge.
+3. **Conventional commits**: `feat(scope): description`, `fix(scope): description`, `test(scope): ...`
+4. **If CI fails**, read the error log, fix the root cause, and rerun `./scripts/agent-check.sh fast`. Do not ask humans until you have tried 3 iterations.
+
 ## Comandos Esenciales
 
 ```bash
