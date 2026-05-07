@@ -4,7 +4,9 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 
 export const VerifyEmailForm: React.FC = () => {
-  const [status, setStatus] = useState<"loading" | "success" | "error" | "expired">("loading");
+  const [status, setStatus] = useState<
+    "loading" | "success" | "error" | "expired"
+  >("loading");
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -15,7 +17,9 @@ export const VerifyEmailForm: React.FC = () => {
 
       if (!token) {
         setStatus("error");
-        setMessage("No verification token provided. Please use the link from your email.");
+        setMessage(
+          "No verification token provided. Please use the link from your email.",
+        );
         return;
       }
 
@@ -33,11 +37,16 @@ export const VerifyEmailForm: React.FC = () => {
           setMessage("Your email has been verified! You can now log in.");
         } else if (response.status === 429) {
           setStatus("error");
-          setMessage(data.error || "Too many attempts. Please wait 1 hour before trying again.");
+          setMessage(
+            data.error ||
+              "Too many attempts. Please wait 1 hour before trying again.",
+          );
         } else if (response.status === 400) {
           if (data.error?.includes("expired")) {
             setStatus("expired");
-            setMessage("Your verification link has expired. Please request a new one from the login page.");
+            setMessage(
+              "Your verification link has expired. Please request a new one from the login page.",
+            );
           } else {
             setStatus("error");
             setMessage(data.error || "Invalid verification token.");
@@ -68,10 +77,12 @@ export const VerifyEmailForm: React.FC = () => {
       {status === "success" && (
         <div className="text-center py-8">
           <div className="text-6xl mb-4">✅</div>
-          <h2 className="text-2xl font-bold text-green-600 mb-4">Email Verified!</h2>
+          <h2 className="text-2xl font-bold text-green-600 mb-4">
+            Email Verified!
+          </h2>
           <p className="text-mocha mb-6">{message}</p>
           <Button
-            onClick={() => window.location.href = "/login"}
+            onClick={() => (window.location.href = "/login")}
             className="w-full font-bold"
             size="lg"
           >
@@ -83,10 +94,12 @@ export const VerifyEmailForm: React.FC = () => {
       {status === "error" && (
         <div className="text-center py-8">
           <div className="text-6xl mb-4">❌</div>
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Verification Failed</h2>
+          <h2 className="text-2xl font-bold text-red-600 mb-4">
+            Verification Failed
+          </h2>
           <p className="text-mocha mb-6">{message}</p>
           <Button
-            onClick={() => window.location.href = "/login"}
+            onClick={() => (window.location.href = "/login")}
             className="w-full font-bold"
             size="lg"
           >
@@ -98,15 +111,18 @@ export const VerifyEmailForm: React.FC = () => {
       {status === "expired" && (
         <div className="text-center py-8">
           <div className="text-6xl mb-4">⏰</div>
-          <h2 className="text-2xl font-bold text-amber-600 mb-4">Link Expired</h2>
+          <h2 className="text-2xl font-bold text-amber-600 mb-4">
+            Link Expired
+          </h2>
           <p className="text-mocha mb-6">{message}</p>
           <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6 text-sm">
             <p className="text-amber-800">
-              <strong>Note:</strong> If you haven't verified your phone yet, you'll need to do so after logging in.
+              <strong>Note:</strong> If you haven't verified your phone yet,
+              you'll need to do so after logging in.
             </p>
           </div>
           <Button
-            onClick={() => window.location.href = "/login"}
+            onClick={() => (window.location.href = "/login")}
             className="w-full font-bold"
             size="lg"
           >

@@ -143,7 +143,10 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
     if (!TURNSTILE_SITE_KEY) return "";
 
     // Skip if still in development (no HTTPS, localhost issues with invisible)
-    if (typeof window !== "undefined" && window.location.hostname === "localhost") {
+    if (
+      typeof window !== "undefined" &&
+      window.location.hostname === "localhost"
+    ) {
       console.log("Skipping Turnstile in development");
       return "";
     }

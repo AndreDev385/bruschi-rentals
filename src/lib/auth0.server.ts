@@ -15,11 +15,11 @@ export const managementClient = new ManagementClient({
 export async function refreshAccessToken(refreshToken: string) {
   const response = await authClient.oauth.refreshTokenGrant({
     refresh_token: refreshToken,
-  })
-  const tokens = response.data
+  });
+  const tokens = response.data;
   return {
     accessToken: tokens.access_token,
     refreshToken: tokens.refresh_token,
     expiresIn: tokens.expires_in,
-  }
+  };
 }

@@ -29,13 +29,13 @@ npx astro check   # TypeScript strict check
 
 Definidas en `src/actions/index.ts`. Todas validan input con Zod.
 
-| Action | Descripción | Auth |
-|--------|-------------|------|
-| `submitPreferences` | Submit form preferences | No |
-| `sendLoginCode` | Enviar código por email | No |
-| `sendLoginCodeSMS` | Enviar código por SMS | No |
-| `toggleFavorite` | Toggle favorito | Session |
-| `submitFeedback` | Submit feedback | Session |
+| Action              | Descripción             | Auth    |
+| ------------------- | ----------------------- | ------- |
+| `submitPreferences` | Submit form preferences | No      |
+| `sendLoginCode`     | Enviar código por email | No      |
+| `sendLoginCodeSMS`  | Enviar código por SMS   | No      |
+| `toggleFavorite`    | Toggle favorito         | Session |
+| `submitFeedback`    | Submit feedback         | Session |
 
 ## Rutas Principales
 
