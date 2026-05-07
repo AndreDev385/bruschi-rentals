@@ -28,6 +28,7 @@ feature/agent-task-123
 2. **Branch Rule — AGENT NEVER MERGES TO MAIN**: All agent work must be committed to the `stage` branch. `main` is protected and requires explicit human approval for any merge.
 3. **Conventional commits**: `feat(scope): description`, `fix(scope): description`, `test(scope): ...`
 4. **If CI fails**, read the error log, fix the root cause, and rerun `./scripts/agent-check.sh fast`. Do not ask humans until you have tried 3 iterations.
+5. **Verify CI passes after pushing to `stage`**. Run `./scripts/agent-check.sh fast` locally first, then push to `origin/staging` and confirm the CI pipeline succeeds. If CI fails, read the error log, fix the root cause, commit the fix, push again, and repeat until green. Do not consider a task done until CI is passing.
 
 ## Comandos Esenciales
 
