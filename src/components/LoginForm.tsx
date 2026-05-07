@@ -48,10 +48,12 @@ export const LoginForm: React.FC = () => {
       }
 
       const data = result.data;
-      
+
       if (!data?.exists) {
         // Client doesn't exist - redirect to registration
-        toast.error("This phone number is not registered. Please complete the preferences form first.");
+        toast.error(
+          "This phone number is not registered. Please complete the preferences form first.",
+        );
         window.location.href = `/more-info${search}`;
         return;
       }
@@ -90,7 +92,11 @@ export const LoginForm: React.FC = () => {
         toast.error(message, {
           duration: 6000,
         });
-      } else if (message.includes("Too many") || message.includes("rate limit") || message.includes("wait")) {
+      } else if (
+        message.includes("Too many") ||
+        message.includes("rate limit") ||
+        message.includes("wait")
+      ) {
         // Rate limit error - show longer duration for user to read
         toast.error(message, {
           duration: 10000,
@@ -105,7 +111,9 @@ export const LoginForm: React.FC = () => {
 
   const handleResendEmail = async () => {
     if (!emailFromCheck) {
-      toast.error("No email on file. Please use a different phone number or contact support.");
+      toast.error(
+        "No email on file. Please use a different phone number or contact support.",
+      );
       return;
     }
 
@@ -122,7 +130,9 @@ export const LoginForm: React.FC = () => {
       }
 
       if (result.data?.success) {
-        toast.success("Verification email sent. Check your inbox and spam folder.");
+        toast.success(
+          "Verification email sent. Check your inbox and spam folder.",
+        );
       }
     } catch (error: unknown) {
       console.error("Resend email error:", error);
@@ -146,7 +156,9 @@ export const LoginForm: React.FC = () => {
       try {
         sanitizedPhone = sanitizePhoneNumber(phoneNumber);
       } catch {
-        throw new Error("Invalid phone number format. Please use international format.");
+        throw new Error(
+          "Invalid phone number format. Please use international format.",
+        );
       }
 
       const response = await fetch("/api/auth/verify-code-sms", {

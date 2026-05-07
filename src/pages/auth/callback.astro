@@ -5,7 +5,7 @@ import { setSession } from "@/lib/auth";
 // Handle Auth0 callback
 const url = new URL(Astro.request.url);
 const code = url.searchParams.get("code");
-const _state = url.searchParams.get("state");
+// state param validated by authClient internally
 
 if (!code) {
   // Error handling
@@ -23,8 +23,12 @@ try {
   const tokens = tokenSet.data || tokenSet;
 
   // Decode id_token to get user info and roles
+  const idToken = tokens.id_token;
+  if (!idToken) {
+    return Astro.redirect("/login?error=missing_id_token");
+  }
   const idTokenPayload = JSON.parse(
-    Buffer.from(tokens.id_token.split(".")[1], "base64").toString(),
+    Buffer.from(idToken.split(".")[1], "base64").toString(),
   );
 
   // Check if user has 'client' role

@@ -5,7 +5,6 @@ import { handleAuthError } from "@/lib/auth-utils";
 import { authClient } from "@/lib/auth0.server";
 import { sanitizePhoneNumber } from "@/lib/utils";
 import {
-  
   SubmitCondoFeedbackSchema,
   SubmitFeedbackSchema,
   SubmitPreferencesSchema,
@@ -96,7 +95,9 @@ export const server = {
               email: data.email || null,
               emailVerified: data.email_verified || false,
               phoneVerified: data.phone_verified || false,
-              message: data.message || "Please verify your email and phone before logging in",
+              message:
+                data.message ||
+                "Please verify your email and phone before logging in",
             };
           }
           throw new ActionError({

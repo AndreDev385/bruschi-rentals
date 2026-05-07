@@ -15,36 +15,38 @@ export const SendLoginCodeSchema = z.object({
 
 export type SendLoginCodeInput = z.infer<typeof SendLoginCodeSchema>;
 
-export const SubmitPreferencesSchema = z.object({
-  name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email").optional().or(z.literal("")), // Email is optional
-  phoneNumber: z
-    .string()
-    .transform((val) => {
-      try {
-        return sanitizePhoneNumber(val);
-      } catch {
-        return val; // Return as-is if sanitization fails, validation will catch it
-      }
-    })
-    .refine(isValidPhoneNumber, { message: "Invalid phone number" }),
-  origin: z.string().default("Organic"),
-  neighborhoodId: z.string().uuid("Invalid neighborhood ID"),
-  neighborhoodName: z.string().optional(),
-  apartmentType: z.enum(["Studio", "OneBed", "TwoBeds", "ThreeOrMoreBeds"]),
-  budget: z.number().positive("Budget must be positive"),
-  moveInDate: z.string().min(1, "Move-in date is required"),
-  tourType: z.enum(["OnSite", "Virtual"]),
-  notes: z.array(z.string()).optional(),
-  termsAccepted: z.boolean().optional(),
-  // Honeypot field - bots will fill this, humans won't
-  website: z.string().optional(),
-  // Cloudflare Turnstile token - optional but validated server-side
-  turnstileToken: z.string().optional(),
-}).refine((data) => !data.website || data.website === "", {
-  message: "Invalid submission",
-  path: ["website"],
-});
+export const SubmitPreferencesSchema = z
+  .object({
+    name: z.string().min(1, "Name is required"),
+    email: z.string().email("Invalid email").optional().or(z.literal("")), // Email is optional
+    phoneNumber: z
+      .string()
+      .transform((val) => {
+        try {
+          return sanitizePhoneNumber(val);
+        } catch {
+          return val; // Return as-is if sanitization fails, validation will catch it
+        }
+      })
+      .refine(isValidPhoneNumber, { message: "Invalid phone number" }),
+    origin: z.string().default("Organic"),
+    neighborhoodId: z.string().uuid("Invalid neighborhood ID"),
+    neighborhoodName: z.string().optional(),
+    apartmentType: z.enum(["Studio", "OneBed", "TwoBeds", "ThreeOrMoreBeds"]),
+    budget: z.number().positive("Budget must be positive"),
+    moveInDate: z.string().min(1, "Move-in date is required"),
+    tourType: z.enum(["OnSite", "Virtual"]),
+    notes: z.array(z.string()).optional(),
+    termsAccepted: z.boolean().optional(),
+    // Honeypot field - bots will fill this, humans won't
+    website: z.string().optional(),
+    // Cloudflare Turnstile token - optional but validated server-side
+    turnstileToken: z.string().optional(),
+  })
+  .refine((data) => !data.website || data.website === "", {
+    message: "Invalid submission",
+    path: ["website"],
+  });
 
 export type FormData = Partial<z.infer<typeof SubmitPreferencesSchema>> & {
   website?: string; // Honeypot field

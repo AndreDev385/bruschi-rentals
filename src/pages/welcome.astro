@@ -15,8 +15,7 @@ if (!session) {
 // Check if welcome page was already seen - if so, redirect to portal
 const welcomeSeen = Astro.cookies.get("welcome_seen");
 if (welcomeSeen?.value === "true") {
-  const search = new URL(Astro.request.url).search;
-  return Astro.redirect(`/portal${search}`);
+  return Astro.redirect(`/portal${new URL(Astro.request.url).search}`);
 }
 
 // First time seeing welcome page - set the cookie
@@ -82,7 +81,10 @@ const search = url.search;
                 <li>• Access clear photos, pricing, and full details</li>
                 <li>• Save favorites and share feedback instantly</li>
                 <li>• Request tours in seconds</li>
-                <li>• Stay directly connected with Paulina & the Bruschi Rentals team</li>
+                <li>
+                  • Stay directly connected with Paulina & the Bruschi Rentals
+                  team
+                </li>
               </ul>
             </div>
 

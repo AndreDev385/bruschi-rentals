@@ -269,12 +269,17 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
         />
 
         {/* Honeypot field - hidden from humans, bots will fill it */}
-        <div style={{ position: 'absolute', left: '-5000px' }} aria-hidden="true">
+        <div
+          style={{ position: "absolute", left: "-5000px" }}
+          aria-hidden="true"
+        >
           <input
             type="text"
             name="website"
             value={formValues.website || ""}
-            onChange={(e) => setFormValues((prev) => ({ ...prev, website: e.target.value }))}
+            onChange={(e) =>
+              setFormValues((prev) => ({ ...prev, website: e.target.value }))
+            }
             tabIndex={-1}
             autoComplete="off"
           />

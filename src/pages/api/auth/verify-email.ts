@@ -13,10 +13,7 @@ export const POST = async ({ request }: { request: Request }) => {
     const { token } = await request.json();
 
     if (!token || typeof token !== "string") {
-      return Response.json(
-        { error: "Token is required" },
-        { status: 400 },
-      );
+      return Response.json({ error: "Token is required" }, { status: 400 });
     }
 
     // Call backend to verify email
@@ -31,11 +28,15 @@ export const POST = async ({ request }: { request: Request }) => {
     if (!response.ok) {
       // Handle specific errors
       let errorMessage = "Verification failed";
-      
+
       if (response.status === 429) {
         // Rate limited - show user-friendly message
         return Response.json(
-          { error: data.error || "Too many attempts. Please wait 1 hour before trying again." },
+          {
+            error:
+              data.error ||
+              "Too many attempts. Please wait 1 hour before trying again.",
+          },
           { status: 429 },
         );
       } else if (response.status === 400) {
@@ -49,7 +50,7 @@ export const POST = async ({ request }: { request: Request }) => {
       } else if (response.status === 404) {
         errorMessage = "Invalid or expired token";
       }
-      
+
       return Response.json(
         { error: errorMessage },
         { status: response.status },
