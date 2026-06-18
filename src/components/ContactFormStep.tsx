@@ -11,7 +11,7 @@ import { useCallback, useEffect, useState } from "react";
 interface ContactFormStepProps {
   onComplete: (data: {
     name: string;
-    email?: string;
+    email: string;
     phoneNumber: string;
     tourType: "OnSite" | "Virtual";
     notes?: string[];
@@ -52,11 +52,9 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
       newErrors.name = "Name is required";
     }
 
-    // Email is optional, but validate format if provided
-    if (
-      formValues.email.trim() &&
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formValues.email)
-    ) {
+    if (!formValues.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formValues.email)) {
       newErrors.email = "Please enter a valid email address";
     }
 
@@ -80,9 +78,8 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
   }, [formValues]);
 
   const isFormValid = useCallback(() => {
-    // Email is optional, but if provided must be valid
     const emailValid =
-      !formValues.email.trim() ||
+      formValues.email.trim() &&
       /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formValues.email);
 
     return (
@@ -113,6 +110,7 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
       setIsCompleted(false);
       setStepCompleted(5, false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formValues, isCompleted, onComplete, setStepCompleted, isFormValid]);
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -196,6 +196,7 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
     // Validate all required fields are present before submitting
     if (
       !formData.name ||
+      !formData.email ||
       !formData.phoneNumber ||
       !formData.neighborhoodId ||
       !formData.apartmentType ||
@@ -212,7 +213,7 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
     try {
       const result = await actions.submitPreferences({
         name: formData.name,
-        email: formData.email || "",
+        email: formData.email,
         phoneNumber: formData.phoneNumber,
         origin,
         neighborhoodId: formData.neighborhoodId,
