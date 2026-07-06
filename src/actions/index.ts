@@ -5,6 +5,7 @@ import { handleAuthError } from "@/lib/auth-utils";
 import { authClient } from "@/lib/auth0.server";
 import { sanitizePhoneNumber } from "@/lib/utils";
 import {
+  ResendEmailVerificationSchema,
   SendLoginCodeSchema,
   SubmitCondoFeedbackSchema,
   SubmitFeedbackSchema,
@@ -216,16 +217,64 @@ export const server = {
           });
         }
 
-        // Rate limit: 5 attempts per minute per phone
+        // Rate limit: 3 attempts per 15 minutes per phone+IP
         const ip =
           context.request.headers.get("x-forwarded-for") ||
           context.request.headers.get("cf-connecting-ip") ||
           "unknown";
         const rateKey = `${sanitizedPhone}:${ip}`;
-        if (!checkRateLimit(rateKey, 5, 60 * 1000)) {
+        if (!checkRateLimit(rateKey, 3, 15 * 60 * 1000)) {
           throw new ActionError({
             code: "TOO_MANY_REQUESTS",
             message: "Too many attempts. Please try again later.",
+          });
+        }
+
+        // Email-first gate: only send SMS if the phone is registered AND
+        // the associated email is verified. This is the defense against
+        // attackers burning Twilio budget on arbitrary numbers.
+        const verifyUrl = `${API_URL}/api/v1/clients/verify-phone?phone=${encodeURIComponent(
+          sanitizedPhone,
+        )}`;
+        const verifyResponse = await fetch(verifyUrl, { method: "GET" });
+
+        if (verifyResponse.status === 404) {
+          throw new ActionError({
+            code: "BAD_REQUEST",
+            message:
+              "This phone number is not registered. Please complete the preferences form first to log in.",
+          });
+        }
+
+        if (verifyResponse.status === 403) {
+          throw new ActionError({
+            code: "FORBIDDEN",
+            message: "Please verify your email before logging in.",
+          });
+        }
+
+        if (!verifyResponse.ok) {
+          console.error(
+            "verify-phone returned non-OK",
+            verifyResponse.status,
+            await verifyResponse.text().catch(() => ""),
+          );
+          throw new ActionError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Unable to verify your account. Please try again later.",
+          });
+        }
+
+        const verifyBody = (await verifyResponse.json()) as {
+          exists?: boolean;
+          verified?: boolean;
+          email_verified?: boolean;
+        };
+
+        if (!verifyBody.verified || !verifyBody.email_verified) {
+          throw new ActionError({
+            code: "FORBIDDEN",
+            message: "Please verify your email before logging in.",
           });
         }
 
@@ -272,6 +321,59 @@ export const server = {
         throw new ActionError({
           code: errorCode,
           message: errorMessage,
+        });
+      }
+    },
+  }),
+
+  resendEmailVerification: defineAction({
+    input: ResendEmailVerificationSchema,
+    handler: async (input, context) => {
+      try {
+        // Rate limit: 5 attempts per minute per email+IP
+        const ip =
+          context.request.headers.get("x-forwarded-for") ||
+          context.request.headers.get("cf-connecting-ip") ||
+          "unknown";
+        const rateKey = `${input.email}:${ip}`;
+        if (!checkRateLimit(rateKey, 5, 60 * 1000)) {
+          throw new ActionError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Too many attempts. Please try again later.",
+          });
+        }
+
+        const response = await fetch(
+          `${API_URL}/api/v1/clients/verify-email/resend`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: input.email }),
+          },
+        );
+
+        if (!response.ok && response.status !== 204) {
+          const errorText = await response.text().catch(() => "");
+          console.error(
+            "Resend verification failed",
+            response.status,
+            errorText,
+          );
+          throw new ActionError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to resend verification email. Please try again.",
+          });
+        }
+
+        return { success: true, message: "Verification email sent" };
+      } catch (error: unknown) {
+        if (error instanceof ActionError) {
+          throw error;
+        }
+        console.error("Resend verification error:", error);
+        throw new ActionError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to resend verification email. Please try again.",
         });
       }
     },

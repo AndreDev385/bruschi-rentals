@@ -11,12 +11,19 @@ import { Label } from "@/components/ui/label";
 //type LoginMethod = "phone" | "email";
 type LoginStep = "input" | "code";
 
+type GateError =
+  | { type: "not_registered" }
+  | { type: "email_unverified"; email: string }
+  | { type: "generic"; message: string };
+
 export const LoginForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<LoginStep>("input");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [code, setCode] = useState("");
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
+  const [isResendingEmail, setIsResendingEmail] = useState(false);
+  const [gateError, setGateError] = useState<GateError | null>(null);
 
   const search = window.location.search;
 
@@ -33,8 +40,52 @@ export const LoginForm: React.FC = () => {
       return;
     }
 
+    setGateError(null);
     setIsSendingCode(true);
     try {
+      // Email-first gate: only proceed if the phone is registered and the
+      // associated email is verified. This avoids burning Twilio budget on
+      // numbers that shouldn't be receiving codes.
+      const verifyUrl = `${import.meta.env.PUBLIC_API_BASE_URL}/api/v1/clients/verify-phone?phone=${encodeURIComponent(phoneNumber.trim())}`;
+      const verifyResponse = await fetch(verifyUrl, { method: "GET" });
+
+      if (verifyResponse.status === 404) {
+        setGateError({ type: "not_registered" });
+        return;
+      }
+
+      if (verifyResponse.status === 403) {
+        const body = (await verifyResponse.json().catch(() => ({}))) as {
+          email?: string;
+        };
+        setGateError({
+          type: "email_unverified",
+          email: body.email ?? "",
+        });
+        return;
+      }
+
+      if (!verifyResponse.ok) {
+        setGateError({
+          type: "generic",
+          message: "Unable to verify your account. Please try again later.",
+        });
+        return;
+      }
+
+      const verifyBody = (await verifyResponse.json()) as {
+        verified?: boolean;
+        email_verified?: boolean;
+      };
+
+      if (!verifyBody.verified || !verifyBody.email_verified) {
+        setGateError({
+          type: "email_unverified",
+          email: "",
+        });
+        return;
+      }
+
       const result = await actions.sendLoginCodeSMS({
         phoneNumber: phoneNumber.trim(),
       });
@@ -60,6 +111,28 @@ export const LoginForm: React.FC = () => {
       }
     } finally {
       setIsSendingCode(false);
+    }
+  };
+
+  const handleResendEmail = async () => {
+    if (!gateError || gateError.type !== "email_unverified" || !gateError.email)
+      return;
+    setIsResendingEmail(true);
+    try {
+      const result = await actions.resendEmailVerification({
+        email: gateError.email,
+      });
+      if (result.data?.success) {
+        toast.success("Verification email sent. Check your inbox.");
+      }
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Failed to resend verification email.";
+      toast.error(message);
+    } finally {
+      setIsResendingEmail(false);
     }
   };
 
@@ -130,7 +203,10 @@ export const LoginForm: React.FC = () => {
             <PhoneInputComponent
               name="phoneNumber"
               value={phoneNumber}
-              onChange={(value) => setPhoneNumber(value)}
+              onChange={(value) => {
+                setPhoneNumber(value);
+                if (gateError) setGateError(null);
+              }}
               required
               disabled={isSendingCode}
             />
@@ -146,6 +222,56 @@ export const LoginForm: React.FC = () => {
             {isSendingCode && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {isSendingCode ? "Sending..." : "Send Code"}
           </Button>
+
+          {gateError && (
+            <div
+              role="alert"
+              className="text-sm text-left bg-amber-50 border border-amber-200 text-amber-900 rounded-lg p-3 space-y-2"
+            >
+              {gateError.type === "not_registered" && (
+                <>
+                  <p>
+                    This phone number isn&apos;t registered yet. Please complete
+                    the preferences form first.
+                  </p>
+                  <a
+                    href={`/${search}`}
+                    className="inline-block font-medium text-primary hover:underline"
+                  >
+                    Complete the preferences form →
+                  </a>
+                </>
+              )}
+              {gateError.type === "email_unverified" && (
+                <>
+                  <p>Please verify your email before logging in.</p>
+                  {gateError.email ? (
+                    <Button
+                      type="button"
+                      variant="link"
+                      className="h-auto p-0 text-primary hover:underline"
+                      onClick={handleResendEmail}
+                      disabled={isResendingEmail}
+                    >
+                      {isResendingEmail && (
+                        <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                      )}
+                      {isResendingEmail
+                        ? "Sending..."
+                        : "Resend verification email"}
+                    </Button>
+                  ) : (
+                    <p className="text-xs text-amber-800">
+                      Use the link from your original registration email, or
+                      contact support.
+                    </p>
+                  )}
+                </>
+              )}
+              {gateError.type === "generic" && <p>{gateError.message}</p>}
+            </div>
+          )}
+
           <div className="flex justify-center items-center">
             <Button
               className="text-primary hover:underline"

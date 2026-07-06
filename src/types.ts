@@ -30,6 +30,14 @@ export const SendLoginCodeSchema = z.object({
 
 export type SendLoginCodeInput = z.infer<typeof SendLoginCodeSchema>;
 
+export const ResendEmailVerificationSchema = z.object({
+  email: z.string().email("Invalid email format"),
+});
+
+export type ResendEmailVerificationInput = z.infer<
+  typeof ResendEmailVerificationSchema
+>;
+
 export const SubmitPreferencesSchema = z
   .object({
     name: z.string().min(1, "Name is required"),
