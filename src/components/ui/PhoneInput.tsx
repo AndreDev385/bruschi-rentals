@@ -12,6 +12,12 @@ interface PhoneInputComponentProps {
   "aria-describedby"?: string;
   disabled?: boolean;
   className?: string;
+  /**
+   * When true, the country selector is hidden and the input is locked to
+   * the US (+1) country code. Use this for surfaces that must only accept
+   * US/NANP numbers (e.g. the public client-registration form).
+   */
+  forceUS?: boolean;
 }
 
 export function PhoneInputComponent({
@@ -24,6 +30,7 @@ export function PhoneInputComponent({
   "aria-describedby": ariaDescribedBy,
   disabled,
   className,
+  forceUS = false,
 }: PhoneInputComponentProps) {
   return (
     <div className={cn("w-full", className)}>
@@ -31,6 +38,8 @@ export function PhoneInputComponent({
         value={value || defaultValue || ""}
         onChange={onChange}
         defaultCountry="us"
+        hideDropdown={forceUS}
+        disableCountryGuess={forceUS}
         inputProps={{
           name,
           required,

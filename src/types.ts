@@ -1,6 +1,21 @@
 import { z } from "astro/zod";
-import { isValidPhoneNumber } from "libphonenumber-js";
+import {
+  isValidPhoneNumber,
+  parsePhoneNumberFromString,
+} from "libphonenumber-js";
 import { sanitizePhoneNumber } from "./lib/utils";
+
+const isUSPhoneNumber = (value: string): boolean => {
+  if (!isValidPhoneNumber(value)) {
+    return false;
+  }
+  try {
+    const parsed = parsePhoneNumberFromString(value);
+    return parsed?.countryCallingCode === "1";
+  } catch {
+    return false;
+  }
+};
 
 export const NeighborhoodSchema = z.object({
   id: z.string().uuid(),
@@ -28,7 +43,9 @@ export const SubmitPreferencesSchema = z
           return val; // Return as-is if sanitization fails, validation will catch it
         }
       })
-      .refine(isValidPhoneNumber, { message: "Invalid phone number" }),
+      .refine(isUSPhoneNumber, {
+        message: "Please enter a valid US phone number",
+      }),
     origin: z.string().default("Organic"),
     neighborhoodId: z.string().uuid("Invalid neighborhood ID"),
     neighborhoodName: z.string().optional(),

@@ -58,8 +58,7 @@ export const server = {
         } catch (error) {
           throw new ActionError({
             code: "BAD_REQUEST",
-            message:
-              "Invalid phone number format. Please use international format with + prefix.",
+            message: "Please enter a valid US phone number",
           });
         }
 

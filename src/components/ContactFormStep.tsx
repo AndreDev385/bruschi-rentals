@@ -5,8 +5,23 @@ import { MultiNoteInput } from "@/components/ui/multi-note-input";
 import type { FormData, Neighborhood } from "@/types";
 
 import { useStepCompletion } from "@/lib/utils";
-import { isValidPhoneNumber } from "libphonenumber-js";
+import {
+  isValidPhoneNumber,
+  parsePhoneNumberFromString,
+} from "libphonenumber-js";
 import { useCallback, useEffect, useState } from "react";
+
+const isUSPhoneNumber = (value: string): boolean => {
+  if (!isValidPhoneNumber(value)) {
+    return false;
+  }
+  try {
+    const parsed = parsePhoneNumberFromString(value);
+    return parsed?.countryCallingCode === "1";
+  } catch {
+    return false;
+  }
+};
 
 interface ContactFormStepProps {
   onComplete: (data: {
@@ -60,8 +75,8 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
 
     if (!formValues.phoneNumber.trim()) {
       newErrors.phoneNumber = "Phone number is required";
-    } else if (!isValidPhoneNumber(formValues.phoneNumber)) {
-      newErrors.phoneNumber = "Please enter a valid phone number";
+    } else if (!isUSPhoneNumber(formValues.phoneNumber)) {
+      newErrors.phoneNumber = "Please enter a valid US phone number";
     }
 
     if (!formValues.tourType) {
@@ -86,7 +101,7 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
       formValues.name.trim() &&
       emailValid &&
       formValues.phoneNumber.trim() &&
-      isValidPhoneNumber(formValues.phoneNumber) &&
+      isUSPhoneNumber(formValues.phoneNumber) &&
       formValues.tourType &&
       formValues.termsAccepted
     );
@@ -188,6 +203,7 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
             value={formValues.phoneNumber}
             onChange={(value) => handleInputChange("phoneNumber", value)}
             required
+            forceUS
             aria-invalid={!!errors.phoneNumber}
             aria-describedby={errors.phoneNumber ? "phone-error" : undefined}
           />
@@ -296,10 +312,13 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
           </label>
         </div>
         <p className="text-xs text-gray-500 mt-2 ml-7">
-          By submitting this form, <strong>you consent to receive SMS messages</strong> including
-          authentication codes AND rental recommendations. Message frequency varies. Message and data
-          rates may apply. Reply <strong>STOP to opt-out</strong> of recommendation messages
-          (authentication codes will still be sent to access the portal). <strong>Reply HELP for support.</strong>
+          By submitting this form,{" "}
+          <strong>you consent to receive SMS messages</strong> including
+          authentication codes AND rental recommendations. Message frequency
+          varies. Message and data rates may apply. Reply{" "}
+          <strong>STOP to opt-out</strong> of recommendation messages
+          (authentication codes will still be sent to access the portal).{" "}
+          <strong>Reply HELP for support.</strong>
         </p>
         {errors.termsAccepted && (
           <p className="text-sm text-red-500 mt-1">{errors.termsAccepted}</p>
