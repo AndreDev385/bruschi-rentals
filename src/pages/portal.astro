@@ -7,7 +7,6 @@ import Layout from "@/layouts/Layout.astro";
 import OptionCard from "@/components/portal/OptionCard";
 import CondoOptionCard from "@/components/portal/CondoOptionCard";
 import CriteriaCard from "@/components/CriteriaCard.astro";
-import { PhoneNumberPrompt } from "@/components/PhoneNumberPrompt";
 import { getSession, setSession } from "@/lib/auth";
 import { listClientOptions } from "@/services/options.server";
 import { listClientCondoOptions } from "@/services/condos.server";
@@ -18,7 +17,6 @@ import type {
   CondoOptionRead,
   ClientPreferencesRead,
 } from "@/types";
-import { getSecret } from "astro:env/server";
 import {
   Home,
   LogOut,
@@ -28,8 +26,6 @@ import {
   DollarSign,
   Notebook,
 } from "lucide-react";
-
-const API_URL = getSecret("API_BASE_URL");
 
 const session = await getSession(Astro);
 
@@ -46,26 +42,6 @@ const hasSeenWelcome = cookies.includes("welcome_seen=true");
 if (!hasSeenWelcome) {
   console.log("First time access, redirecting to welcome");
   return Astro.redirect("/welcome");
-}
-
-// Get client data (needed for both phone check and condo options)
-let needsPhoneNumber = false;
-let clientId: string | null = null;
-
-try {
-  const response = await fetch(`${API_URL}/api/v1/clients/me`, {
-    headers: { Authorization: `Bearer ${session.accessToken}` },
-  });
-
-  if (response.ok) {
-    const client = await response.json();
-    needsPhoneNumber = !client.phone_number;
-    clientId = client.id;
-  }
-} catch (error) {
-  console.error("Failed to fetch client data:", error);
-  // Don't block user if check fails, continue to portal
-  needsPhoneNumber = false;
 }
 
 let options: ClientOptionRead[] = [];
@@ -146,32 +122,6 @@ try {
 ---
 
 <Layout>
-  {
-    needsPhoneNumber && (
-      <PhoneNumberPrompt
-        client:only="react"
-        email={session.user.email || ""}
-        onSubmit={async (phoneNumber: string) => {
-          const response = await fetch(`${API_URL}/api/v1/clients/me/phone`, {
-            method: "PATCH",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.accessToken}`,
-            },
-            body: JSON.stringify({ phone_number: phoneNumber }),
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error || "Failed to add phone number");
-          }
-
-          // Reload page to dismiss prompt
-          window.location.reload();
-        }}
-      />
-    )
-  }
   <header class="py-4 border-b border-border">
     <div class="max-w-4xl mx-auto px-6">
       <div class="flex justify-between items-center">
@@ -206,7 +156,7 @@ try {
           </h1>
           <p class="text-muted-foreground text-lg">
             {
-			options.length > 0 || condoOptions.length > 0
+              options.length > 0 || condoOptions.length > 0
                 ? "Based on your criteria, we’ve identified the strongest matches to help you move forward with clarity and confidence."
                 : "Your realtor is currently looking for the best fits for you based on your preferences."
             }
@@ -216,16 +166,38 @@ try {
           latestPreference && (
             <div class="bg-muted/30 rounded-lg p-6">
               <h2 class="text-xl text-center font-semibold text-foreground mb-2">
-                What matters most to you 
+                What matters most to you
               </h2>
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-				<CriteriaCard name="Neighborhood" value={latestPreference.neighborhood_name} Icon={MapPin} />
-				<CriteriaCard name="Apartment type" value={latestPreference.apartment_type.replace(/([A-Z])/g, " $1").trim()}  Icon={Home} />
-				<CriteriaCard name="Budget" value={`$${latestPreference.budget.toLocaleString()}`} Icon={DollarSign} />
-				<CriteriaCard name="Tour Type" value={latestPreference.tour_type} Icon={Camera} />
-				<CriteriaCard name="Move-in Date" value={new Date(
-                        latestPreference.move_in_date,
-                      ).toLocaleDateString()} Icon={Calendar} />
+                <CriteriaCard
+                  name="Neighborhood"
+                  value={latestPreference.neighborhood_name}
+                  Icon={MapPin}
+                />
+                <CriteriaCard
+                  name="Apartment type"
+                  value={latestPreference.apartment_type
+                    .replace(/([A-Z])/g, " $1")
+                    .trim()}
+                  Icon={Home}
+                />
+                <CriteriaCard
+                  name="Budget"
+                  value={`$${latestPreference.budget.toLocaleString()}`}
+                  Icon={DollarSign}
+                />
+                <CriteriaCard
+                  name="Tour Type"
+                  value={latestPreference.tour_type}
+                  Icon={Camera}
+                />
+                <CriteriaCard
+                  name="Move-in Date"
+                  value={new Date(
+                    latestPreference.move_in_date,
+                  ).toLocaleDateString()}
+                  Icon={Calendar}
+                />
 
                 {latestPreference.notes.length > 0 && (
                   <div class="flex items-start space-x-3 p-3 bg-white rounded-md shadow-sm md:col-span-2">

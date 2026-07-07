@@ -19,6 +19,14 @@ import { v4 as uuidv4 } from "uuid";
 
 const API_URL = getSecret("API_BASE_URL");
 
+// Support contact — surfaced in login error messages so users with
+// stuck accounts know who to call. Twilio is shut down, so we can no
+// longer fall back to SMS-OTP for Auth0 users still bound to the SMS
+// connection. Staff can fix this via the dashboard's "Send login
+// setup email" button after collecting an email from the client.
+const SUPPORT_PHONE = "+1 (786) 613-0664";
+const SUPPORT_PHONE_TEL = "+17866130664";
+
 // Simple in-memory rate limiter
 const rateLimitMap = new Map<string, { count: number; resetTime: number }>();
 
@@ -104,13 +112,6 @@ export const server = {
                   "You're already registered with this email! Please proceed to login.",
               });
             }
-            if (errorData.error === "phone number already exists") {
-              throw new ActionError({
-                code: "CONFLICT",
-                message:
-                  "You're already registered with this phone number! Please proceed to login.",
-              });
-            }
           }
 
           // Handle validation errors (400)
@@ -149,16 +150,60 @@ export const server = {
       try {
         const { email } = input;
 
-        // Rate limit: 5 attempts per minute per email
+        // Rate limit: 4 attempts per hour per email+IP
         const ip =
           context.request.headers.get("x-forwarded-for") ||
           context.request.headers.get("cf-connecting-ip") ||
           "unknown";
         const rateKey = `${email}:${ip}`;
-        if (!checkRateLimit(rateKey, 5, 60 * 1000)) {
+        if (!checkRateLimit(rateKey, 4, 60 * 60 * 1000)) {
           throw new ActionError({
             code: "TOO_MANY_REQUESTS",
             message: "Too many attempts. Please try again later.",
+          });
+        }
+
+        // Pre-check: only send the Auth0 email-OTP if the email is
+        // registered AND verified. This is the defense against
+        // attackers burning Auth0 budget on unknown / unverified
+        // addresses (mirrors the old SMS email-first gate).
+        const statusResponse = await fetch(
+          `${API_URL}/api/v1/verification/email-status`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          },
+        );
+
+        if (statusResponse.status === 404) {
+          throw new ActionError({
+            code: "BAD_REQUEST",
+            message:
+              "This email is not registered. Please complete the preferences form first to log in.",
+          });
+        }
+
+        if (!statusResponse.ok) {
+          console.error(
+            "email-status returned non-OK",
+            statusResponse.status,
+            await statusResponse.text().catch(() => ""),
+          );
+          throw new ActionError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Unable to verify your account. Please try again later.",
+          });
+        }
+
+        const statusBody = (await statusResponse.json()) as {
+          verified?: boolean;
+        };
+
+        if (!statusBody.verified) {
+          throw new ActionError({
+            code: "FORBIDDEN",
+            message: "Please verify your email before logging in.",
           });
         }
 
@@ -189,137 +234,21 @@ export const server = {
           }
         }
 
+        // Auth0 rejects email-OTP sends for users whose Auth0 record
+        // sits on the SMS connection. We have no SMS fallback (Twilio is
+        // shut down), so direct the user to support.
+        if (
+          errorMessage !== "Failed to send login email" &&
+          !errorMessage.includes(SUPPORT_PHONE) &&
+          !errorMessage.includes(SUPPORT_PHONE_TEL)
+        ) {
+          errorMessage = `${errorMessage} If this keeps happening, call ${SUPPORT_PHONE}.`;
+        } else if (errorMessage === "Failed to send login email") {
+          errorMessage = `We couldn't send the login code. If this keeps happening, call ${SUPPORT_PHONE}.`;
+        }
+
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
-          message: errorMessage,
-        });
-      }
-    },
-  }),
-
-  sendLoginCodeSMS: defineAction({
-    input: z.object({
-      phoneNumber: z
-        .string()
-        .regex(/^\+[1-9]\d{1,14}$/, "Invalid phone number format"),
-    }),
-    handler: async (input, context) => {
-      try {
-        // Sanitize phone number
-        let sanitizedPhone: string;
-        try {
-          sanitizedPhone = sanitizePhoneNumber(input.phoneNumber);
-        } catch (error) {
-          throw new ActionError({
-            code: "BAD_REQUEST",
-            message:
-              "Invalid phone number format. Please use international format with + prefix.",
-          });
-        }
-
-        // Rate limit: 3 attempts per 15 minutes per phone+IP
-        const ip =
-          context.request.headers.get("x-forwarded-for") ||
-          context.request.headers.get("cf-connecting-ip") ||
-          "unknown";
-        const rateKey = `${sanitizedPhone}:${ip}`;
-        if (!checkRateLimit(rateKey, 3, 15 * 60 * 1000)) {
-          throw new ActionError({
-            code: "TOO_MANY_REQUESTS",
-            message: "Too many attempts. Please try again later.",
-          });
-        }
-
-        // Email-first gate: only send SMS if the phone is registered AND
-        // the associated email is verified. This is the defense against
-        // attackers burning Twilio budget on arbitrary numbers.
-        const verifyUrl = `${API_URL}/api/v1/clients/verify-phone?phone=${encodeURIComponent(
-          sanitizedPhone,
-        )}`;
-        const verifyResponse = await fetch(verifyUrl, { method: "GET" });
-
-        if (verifyResponse.status === 404) {
-          throw new ActionError({
-            code: "BAD_REQUEST",
-            message:
-              "This phone number is not registered. Please complete the preferences form first to log in.",
-          });
-        }
-
-        if (verifyResponse.status === 403) {
-          throw new ActionError({
-            code: "FORBIDDEN",
-            message: "Please verify your email before logging in.",
-          });
-        }
-
-        if (!verifyResponse.ok) {
-          console.error(
-            "verify-phone returned non-OK",
-            verifyResponse.status,
-            await verifyResponse.text().catch(() => ""),
-          );
-          throw new ActionError({
-            code: "INTERNAL_SERVER_ERROR",
-            message: "Unable to verify your account. Please try again later.",
-          });
-        }
-
-        const verifyBody = (await verifyResponse.json()) as {
-          exists?: boolean;
-          verified?: boolean;
-          email_verified?: boolean;
-        };
-
-        if (!verifyBody.verified || !verifyBody.email_verified) {
-          throw new ActionError({
-            code: "FORBIDDEN",
-            message: "Please verify your email before logging in.",
-          });
-        }
-
-        // Send passwordless SMS with code
-        await authClient.passwordless.sendSMS({
-          phone_number: sanitizedPhone,
-        });
-
-        return { success: true, message: "Login code sent via SMS" };
-      } catch (error: unknown) {
-        if (error instanceof ActionError) {
-          throw error;
-        }
-
-        console.error("Passwordless SMS login error:", error);
-
-        // Handle specific Auth0 errors
-        let errorMessage = "Failed to send login SMS";
-        let errorCode: "INTERNAL_SERVER_ERROR" | "SERVICE_UNAVAILABLE" =
-          "INTERNAL_SERVER_ERROR";
-
-        if (error instanceof Error) {
-          // Check for timeout errors
-          if (
-            error.message.includes("timeout") ||
-            error.message.includes("timed out") ||
-            error.name === "TimeoutError"
-          ) {
-            errorMessage =
-              "SMS service is currently unavailable. Please try email login instead or contact support.";
-            errorCode = "SERVICE_UNAVAILABLE";
-          } else if (error.message) {
-            errorMessage = error.message;
-          }
-        } else if (typeof error === "object" && error && "response" in error) {
-          const err = error as {
-            response?: { data?: { error_description?: string } };
-          };
-          if (err.response?.data?.error_description) {
-            errorMessage = err.response.data.error_description;
-          }
-        }
-
-        throw new ActionError({
-          code: errorCode,
           message: errorMessage,
         });
       }
@@ -361,7 +290,7 @@ export const server = {
           );
           throw new ActionError({
             code: "INTERNAL_SERVER_ERROR",
-            message: "Failed to resend verification email. Please try again.",
+            message: `Failed to resend verification email. If this keeps happening, call ${SUPPORT_PHONE}.`,
           });
         }
 
@@ -373,7 +302,7 @@ export const server = {
         console.error("Resend verification error:", error);
         throw new ActionError({
           code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to resend verification email. Please try again.",
+          message: `Failed to resend verification email. If this keeps happening, call ${SUPPORT_PHONE}.`,
         });
       }
     },

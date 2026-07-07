@@ -1,14 +1,25 @@
 import { actions } from "astro:actions";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Info, Loader2, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { PhoneInputComponent } from "@/components/ui/PhoneInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-//type LoginMethod = "phone" | "email";
+const SUPPORT_PHONE = "+1 (786) 613-0664";
+const SUPPORT_PHONE_TEL = "+17866130664";
+const EMAIL_UPGRADE_NOTICE_DISMISSED_KEY = "loginEmailNoticeDismissed";
+
+// Appends the support phone to error messages so users with stuck
+// accounts know who to call. Only adds it once per message.
+const appendSupportContact = (message: string): string => {
+  if (message.includes(SUPPORT_PHONE) || message.includes(SUPPORT_PHONE_TEL)) {
+    return message;
+  }
+  return `${message} If this keeps happening, call ${SUPPORT_PHONE}.`;
+};
+
 type LoginStep = "input" | "code";
 
 type GateError =
@@ -18,54 +29,70 @@ type GateError =
 
 export const LoginForm: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<LoginStep>("input");
-  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
   const [isSendingCode, setIsSendingCode] = useState(false);
   const [isVerifyingCode, setIsVerifyingCode] = useState(false);
   const [isResendingEmail, setIsResendingEmail] = useState(false);
   const [gateError, setGateError] = useState<GateError | null>(null);
+  const [showEmailUpgradeNotice, setShowEmailUpgradeNotice] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    setShowEmailUpgradeNotice(
+      window.localStorage.getItem(EMAIL_UPGRADE_NOTICE_DISMISSED_KEY) !==
+        "true",
+    );
+  }, []);
+
+  const dismissEmailUpgradeNotice = () => {
+    if (typeof window !== "undefined") {
+      window.localStorage.setItem(
+        EMAIL_UPGRADE_NOTICE_DISMISSED_KEY,
+        "true",
+      );
+    }
+    setShowEmailUpgradeNotice(false);
+  };
 
   const search = window.location.search;
 
   const handleSendCode = async () => {
-    if (!phoneNumber.trim()) {
-      toast.error("Please enter your phone number");
+    if (!email.trim()) {
+      toast.error("Please enter your email");
       return;
     }
 
-    // Basic phone validation (E.164 format check)
-    const phoneRegex = /^\+[1-9]\d{1,14}$/;
-    if (!phoneRegex.test(phoneNumber.trim())) {
-      toast.error("Please enter a valid phone number");
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      toast.error("Please enter a valid email address");
       return;
     }
 
     setGateError(null);
     setIsSendingCode(true);
     try {
-      // Email-first gate: only proceed if the phone is registered and the
-      // associated email is verified. This avoids burning Twilio budget on
-      // numbers that shouldn't be receiving codes.
-      const verifyUrl = `${import.meta.env.PUBLIC_API_BASE_URL}/api/v1/clients/verify-phone?phone=${encodeURIComponent(phoneNumber.trim())}`;
-      const verifyResponse = await fetch(verifyUrl, { method: "GET" });
+      // Pre-check: confirm the email is registered AND verified before
+      // asking Auth0 to send a code. This avoids wasting Auth0 budget on
+      // unknown / unverified addresses.
+      const apiBaseUrl =
+        (import.meta.env.PUBLIC_API_BASE_URL as string | undefined) || "";
+      const statusResponse = await fetch(
+        `${apiBaseUrl}/api/v1/verification/email-status`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: email.trim() }),
+        },
+      );
 
-      if (verifyResponse.status === 404) {
+      if (statusResponse.status === 404) {
         setGateError({ type: "not_registered" });
         return;
       }
 
-      if (verifyResponse.status === 403) {
-        const body = (await verifyResponse.json().catch(() => ({}))) as {
-          email?: string;
-        };
-        setGateError({
-          type: "email_unverified",
-          email: body.email ?? "",
-        });
-        return;
-      }
-
-      if (!verifyResponse.ok) {
+      if (!statusResponse.ok) {
         setGateError({
           type: "generic",
           message: "Unable to verify your account. Please try again later.",
@@ -73,42 +100,28 @@ export const LoginForm: React.FC = () => {
         return;
       }
 
-      const verifyBody = (await verifyResponse.json()) as {
+      const statusBody = (await statusResponse.json()) as {
         verified?: boolean;
-        email_verified?: boolean;
       };
 
-      if (!verifyBody.verified || !verifyBody.email_verified) {
-        setGateError({
-          type: "email_unverified",
-          email: "",
-        });
+      if (!statusBody.verified) {
+        setGateError({ type: "email_unverified", email: email.trim() });
         return;
       }
 
-      const result = await actions.sendLoginCodeSMS({
-        phoneNumber: phoneNumber.trim(),
-      });
+      const result = await actions.sendLoginCode({ email: email.trim() });
 
       if (result.data?.success) {
-        toast.success("Code sent! Check your phone.");
+        toast.success("Code sent! Check your email.");
         setCurrentStep("code");
       }
     } catch (error: unknown) {
       console.error("Send code error:", error);
-      const message =
+      const rawMessage =
         error instanceof Error
           ? error.message
           : "Failed to send code. Please try again.";
-
-      // Special handling for service unavailable
-      if (message.includes("unavailable") || message.includes("timeout")) {
-        toast.error(message, {
-          duration: 6000, // Show longer for important messages
-        });
-      } else {
-        toast.error(message);
-      }
+      toast.error(appendSupportContact(rawMessage));
     } finally {
       setIsSendingCode(false);
     }
@@ -126,11 +139,11 @@ export const LoginForm: React.FC = () => {
         toast.success("Verification email sent. Check your inbox.");
       }
     } catch (error: unknown) {
-      const message =
+      const rawMessage =
         error instanceof Error
           ? error.message
           : "Failed to resend verification email.";
-      toast.error(message);
+      toast.error(appendSupportContact(rawMessage));
     } finally {
       setIsResendingEmail(false);
     }
@@ -144,11 +157,11 @@ export const LoginForm: React.FC = () => {
 
     setIsVerifyingCode(true);
     try {
-      const response = await fetch("/api/auth/verify-code-sms", {
+      const response = await fetch("/api/auth/verify-code", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          phoneNumber: phoneNumber.trim(),
+          email: email.trim(),
           code: code.trim(),
         }),
       });
@@ -162,17 +175,17 @@ export const LoginForm: React.FC = () => {
       }
     } catch (error: unknown) {
       console.error("Verify error:", error);
-      const message =
+      const rawMessage =
         error instanceof Error
           ? error.message
           : "Invalid code. Please try again.";
-      toast.error(message);
+      toast.error(appendSupportContact(rawMessage));
     } finally {
       setIsVerifyingCode(false);
     }
   };
 
-  const handleBackToPhone = () => {
+  const handleBackToEmail = () => {
     setCurrentStep("input");
     setCode("");
   };
@@ -185,13 +198,34 @@ export const LoginForm: React.FC = () => {
 
   return (
     <div className="max-w-md bg-soft rounded-xl shadow-lg p-8">
+      {showEmailUpgradeNotice && (
+        <div
+          role="status"
+          className="mb-4 flex items-start gap-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900"
+        >
+          <Info className="mt-0.5 h-4 w-4 flex-shrink-0" />
+          <p className="flex-1">
+            <strong>We&apos;ve upgraded to email login.</strong> Use the email
+            on your account to receive a 6-digit code instead of an SMS code.
+          </p>
+          <button
+            type="button"
+            onClick={dismissEmailUpgradeNotice}
+            aria-label="Dismiss notice"
+            className="flex-shrink-0 rounded p-0.5 text-amber-900 hover:bg-amber-100"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       <div className="text-center mb-4">
         <h1 className="text-3xl font-bold text-obsidian mb-2">Log In</h1>
         <p className="text-mocha">Access your personalized rental portal</p>
         <div className="text-xs text-gray-500 bg-soft-dark/30 p-3 rounded-lg">
           <p>
             <strong>Secure Access:</strong> We send a one-time verification code
-            to your phone to confirm your identity and keep your account secure.
+            to your email to confirm your identity and keep your account secure.
           </p>
         </div>
       </div>
@@ -199,16 +233,21 @@ export const LoginForm: React.FC = () => {
       {currentStep === "input" && (
         <div className="space-y-4">
           <div>
-            <Label htmlFor="phoneNumber">Phone Number</Label>
-            <PhoneInputComponent
-              name="phoneNumber"
-              value={phoneNumber}
-              onChange={(value) => {
-                setPhoneNumber(value);
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
                 if (gateError) setGateError(null);
               }}
               required
               disabled={isSendingCode}
+              className="text-base"
+              placeholder="you@example.com"
             />
           </div>
 
@@ -231,8 +270,8 @@ export const LoginForm: React.FC = () => {
               {gateError.type === "not_registered" && (
                 <>
                   <p>
-                    This phone number isn&apos;t registered yet. Please complete
-                    the preferences form first.
+                    This email isn&apos;t registered yet. Please complete the
+                    preferences form first to create your account.
                   </p>
                   <a
                     href={`/${search}`}
@@ -244,43 +283,30 @@ export const LoginForm: React.FC = () => {
               )}
               {gateError.type === "email_unverified" && (
                 <>
-                  <p>Please verify your email before logging in.</p>
-                  {gateError.email ? (
-                    <Button
-                      type="button"
-                      variant="link"
-                      className="h-auto p-0 text-primary hover:underline"
-                      onClick={handleResendEmail}
-                      disabled={isResendingEmail}
-                    >
-                      {isResendingEmail && (
-                        <Loader2 className="mr-2 h-3 w-3 animate-spin" />
-                      )}
-                      {isResendingEmail
-                        ? "Sending..."
-                        : "Resend verification email"}
-                    </Button>
-                  ) : (
-                    <p className="text-xs text-amber-800">
-                      Use the link from your original registration email, or
-                      contact support.
-                    </p>
-                  )}
+                  <p>
+                    Your email isn&apos;t verified yet. We sent you a
+                    verification link when you registered — check your inbox
+                    (and spam folder).
+                  </p>
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="h-auto p-0 text-primary hover:underline"
+                    onClick={handleResendEmail}
+                    disabled={isResendingEmail}
+                  >
+                    {isResendingEmail && (
+                      <Loader2 className="mr-2 h-3 w-3 animate-spin" />
+                    )}
+                    {isResendingEmail
+                      ? "Sending..."
+                      : "Resend verification email"}
+                  </Button>
                 </>
               )}
               {gateError.type === "generic" && <p>{gateError.message}</p>}
             </div>
           )}
-
-          <div className="flex justify-center items-center">
-            <Button
-              className="text-primary hover:underline"
-              variant="link"
-              onClick={() => setCurrentStep("code")}
-            >
-              Already have a code?
-            </Button>
-          </div>
         </div>
       )}
 
@@ -288,8 +314,8 @@ export const LoginForm: React.FC = () => {
         <div className="space-y-6">
           <div className="text-center mb-4">
             <p className="text-sm text-mocha">
-              We've sent a <strong>6-digit code</strong>. Enter it below to
-              continue.
+              We&apos;ve sent a <strong>6-digit code</strong> to{" "}
+              <strong>{email}</strong>. Enter it below to continue.
             </p>
           </div>
 
@@ -326,12 +352,12 @@ export const LoginForm: React.FC = () => {
 
           <Button
             type="button"
-            onClick={handleBackToPhone}
+            onClick={handleBackToEmail}
             disabled={isVerifyingCode}
             className="w-full font-bold"
             variant="link"
           >
-            ← Back to phone number
+            ← Back to email
           </Button>
         </div>
       )}
