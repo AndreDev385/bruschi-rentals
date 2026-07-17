@@ -184,6 +184,13 @@ export const server = {
           });
         }
 
+        if (statusResponse.status === 429) {
+          throw new ActionError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Too many attempts. Please wait a bit and try again.",
+          });
+        }
+
         if (!statusResponse.ok) {
           console.error(
             "email-status returned non-OK",

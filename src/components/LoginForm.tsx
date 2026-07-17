@@ -25,6 +25,7 @@ type LoginStep = "input" | "code";
 type GateError =
   | { type: "not_registered" }
   | { type: "email_unverified"; email: string }
+  | { type: "rate_limited" }
   | { type: "generic"; message: string };
 
 export const LoginForm: React.FC = () => {
@@ -89,6 +90,11 @@ export const LoginForm: React.FC = () => {
 
       if (statusResponse.status === 404) {
         setGateError({ type: "not_registered" });
+        return;
+      }
+
+      if (statusResponse.status === 429) {
+        setGateError({ type: "rate_limited" });
         return;
       }
 
@@ -303,6 +309,11 @@ export const LoginForm: React.FC = () => {
                       : "Resend verification email"}
                   </Button>
                 </>
+              )}
+              {gateError.type === "rate_limited" && (
+                <p>
+                  Too many attempts. Please wait a bit and try again.
+                </p>
               )}
               {gateError.type === "generic" && <p>{gateError.message}</p>}
             </div>
