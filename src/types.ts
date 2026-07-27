@@ -91,6 +91,7 @@ export type ClientOption = {
 
 export type ClientOptionRead = ClientOption & {
   building_name: string;
+  building_code: string;
   apartment_type: string;
   price_range: PriceRange;
   selected_by_name: string;

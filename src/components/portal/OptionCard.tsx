@@ -97,7 +97,7 @@ const OptionCard = ({ option }: OptionCardProps) => {
               <img
                 ref={imgRef}
                 src={currentImage}
-                alt={option.building_name}
+                alt={option.building_code}
                 className={cn(
                   "w-full h-full object-cover transition-opacity duration-300",
                   imageLoaded[currentImageIndex] ? "opacity-100" : "opacity-0",
@@ -191,7 +191,7 @@ const OptionCard = ({ option }: OptionCardProps) => {
           <div className="space-y-2">
             <div className="flex flex-col">
               <h3 className="font-semibold text-lg leading-tight line-clamp-1">
-                {option.building_name}
+                {option.building_code}
               </h3>
               <span className="font-bold text-primary text-lg whitespace-nowrap">
                 ${option.price_range.from.toLocaleString()} - $
