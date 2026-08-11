@@ -31,6 +31,7 @@ interface ContactFormStepProps {
     tourType: "OnSite" | "Virtual";
     notes?: string[];
     termsAccepted: boolean;
+    website?: string; // Honeypot field
   }) => void;
   formData: FormData;
   neighborhoods?: Neighborhood[];
@@ -48,6 +49,7 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
     tourType: "OnSite" | "Virtual" | "";
     notes: string[];
     termsAccepted: boolean;
+    website?: string; // Honeypot field
   }>({
     name: formData.name || "",
     email: formData.email || "",
@@ -55,6 +57,7 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
     tourType: (formData.tourType as "OnSite" | "Virtual") || "",
     notes: formData.notes || [],
     termsAccepted: formData.termsAccepted || false,
+    website: undefined,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -118,6 +121,7 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
         tourType: formValues.tourType as "OnSite" | "Virtual",
         notes: formValues.notes.length > 0 ? formValues.notes : undefined,
         termsAccepted: formValues.termsAccepted,
+        website: formValues.website,
       });
       setIsCompleted(true);
       setStepCompleted(5, true); // ContactFormStep is step 5
@@ -139,6 +143,7 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
         tourType: formValues.tourType as "OnSite" | "Virtual",
         notes: formValues.notes.length > 0 ? formValues.notes : undefined,
         termsAccepted: formValues.termsAccepted,
+        website: formValues.website,
       });
     }
   };
@@ -279,6 +284,23 @@ const ContactFormStep: React.FC<ContactFormStepProps> = ({
             setFormValues((prev) => ({ ...prev, notes }))
           }
         />
+
+        {/* Honeypot field - hidden from humans, bots will fill it */}
+        <div
+          style={{ position: "absolute", left: "-5000px" }}
+          aria-hidden="true"
+        >
+          <input
+            type="text"
+            name="website"
+            value={formValues.website || ""}
+            onChange={(e) =>
+              setFormValues((prev) => ({ ...prev, website: e.target.value }))
+            }
+            tabIndex={-1}
+            autoComplete="off"
+          />
+        </div>
 
         <div className="flex items-start space-x-3">
           <input

@@ -13,6 +13,9 @@ import ContactFormStep from "./ContactFormStep";
 import DatePickerStep from "./DatePickerStep";
 import NeighborhoodStep from "./NeighborhoodStep";
 
+// Cloudflare Turnstile - get site key from environment
+const TURNSTILE_SITE_KEY = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "";
+
 const steps = [
   { id: 1, component: NeighborhoodStep, title: "Choose Neighborhood" },
   { id: 2, component: ApartmentTypeStep, title: "Apartment Size" },
@@ -35,6 +38,8 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
   } | null>(null);
   const [isLoadingPriceRange, setIsLoadingPriceRange] = useState(false);
   const budgetStepRef = useRef<BudgetStepRef>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
+  const turnstileRef = useRef<HTMLDivElement>(null);
 
   // Context for step completion tracking without formData re-renders
   const setStepCompleted = useCallback((stepId: number, completed: boolean) => {
@@ -89,6 +94,85 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
       setOrigin(originParam);
     }
   }, []);
+
+  // Initialize Cloudflare Turnstile (invisible mode)
+  useEffect(() => {
+    if (!TURNSTILE_SITE_KEY) return;
+
+    const renderWidget = () => {
+      // @ts-ignore - Turnstile API
+      if (window.turnstile && turnstileRef.current) {
+        // @ts-ignore - Turnstile render for invisible mode
+        window.turnstile.render(turnstileRef.current, {
+          sitekey: TURNSTILE_SITE_KEY,
+          size: "invisible",
+          callback: (token: string) => {
+            setTurnstileToken(token);
+          },
+        });
+      }
+    };
+
+    // If script already loaded, render immediately
+    // @ts-ignore - Turnstile API
+    if (window.turnstile) {
+      renderWidget();
+      return;
+    }
+
+    // Load script
+    const script = document.createElement("script");
+    script.src = "https://challenges.cloudflare.com/turnstile/v0/api.js";
+    script.async = true;
+    script.defer = true;
+    script.onload = renderWidget;
+    document.body.appendChild(script);
+
+    return () => {
+      // @ts-ignore - Turnstile API
+      if (window.turnstile && turnstileRef.current) {
+        // @ts-ignore - Turnstile remove
+        window.turnstile.remove(turnstileRef.current);
+      }
+    };
+  }, [TURNSTILE_SITE_KEY]);
+
+  // Get Turnstile token - works for both invisible and visible modes
+  // Skip Turnstile in development or if not configured
+  const getTurnstileToken = useCallback(async (): Promise<string> => {
+    if (!TURNSTILE_SITE_KEY) return "";
+
+    // Skip if still in development (no HTTPS, localhost issues with invisible)
+    if (
+      typeof window !== "undefined" &&
+      window.location.hostname === "localhost"
+    ) {
+      console.log("Skipping Turnstile in development");
+      return "";
+    }
+
+    return new Promise((resolve) => {
+      // @ts-ignore - Turnstile API
+      if (window.turnstile && turnstileRef.current) {
+        // @ts-ignore - Turnstile execute for invisible mode
+        window.turnstile.execute(turnstileRef.current, {
+          callback: (token: string) => {
+            resolve(token);
+          },
+          "error-callback": () => {
+            console.warn("Turnstile execute error");
+            resolve("");
+          },
+          "timeout-callback": () => {
+            console.warn("Turnstile execute timeout");
+            resolve("");
+          },
+        });
+      } else {
+        resolve(turnstileToken);
+      }
+    });
+  }, [TURNSTILE_SITE_KEY, turnstileToken]);
 
   const totalSteps = steps.length;
   const progress = (currentStep / totalSteps) * 100;
@@ -209,6 +293,19 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
       return;
     }
 
+    // Validate Turnstile token if enabled
+    // For invisible mode, we get token at submit time
+    let finalTurnstileToken = turnstileToken;
+    if (TURNSTILE_SITE_KEY) {
+      // Get fresh token for invisible mode
+      finalTurnstileToken = await getTurnstileToken();
+      if (!finalTurnstileToken) {
+        toast.error("Verification failed. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
     setIsSubmitting(true);
     try {
       const result = await actions.submitPreferences({
@@ -222,6 +319,8 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
         moveInDate: formData.moveInDate,
         tourType: formData.tourType,
         notes: formData.notes,
+        website: formData.website,
+        turnstileToken: finalTurnstileToken,
       });
 
       // Check if the action returned an error
@@ -327,6 +426,17 @@ export const FormWizard: React.FC<{ neighborhoods: Neighborhood[] }> = ({
                 : "Next"}
           </Button>
         </div>
+
+        {/* Cloudflare Turnstile Widget - Bot Protection (invisible, always rendered) */}
+        {TURNSTILE_SITE_KEY && (
+          <div className="hidden">
+            <div
+              ref={turnstileRef}
+              data-sitekey={TURNSTILE_SITE_KEY}
+              data-size="invisible"
+            />
+          </div>
+        )}
       </div>
     </StepCompletionContext.Provider>
   );
