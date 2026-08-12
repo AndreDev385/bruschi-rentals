@@ -14,6 +14,7 @@ import MediaGallery from "@/components/MediaGallery";
 import FavoriteButton from "@/components/portal/FavoriteButton";
 import PromotionsSection from "@/components/portal/PromotionsSection";
 import FeedbackForm from "@/components/portal/FeedbackForm";
+import { ScheduleTourButton } from "@/components/portal/ScheduleTourButton";
 import { Button } from "@/components/ui/button";
 
 const session = await getSession(Astro);
@@ -166,6 +167,9 @@ const formatApartmentType = (type: string) => {
               Fees & Parking: ${option.fees_and_parking_price.toLocaleString()}
             </div>
           </div>
+
+          <!-- Schedule Tour Button -->
+          <ScheduleTourButton client:load />
 
           <!-- Reference Note -->
           <div
